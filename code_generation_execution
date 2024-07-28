@@ -1,5 +1,5 @@
+#!pip install --upgrade transformers -> for llama 3.1
 #!pip install datasets evaluate rouge_score bert_score
-#!pip install --upgrade transformers   --for llama3.1
 
 #filtered_test_data with python script
 
@@ -7,6 +7,7 @@ import json
 import random
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
+from tqdm import tqdm
 import pandas as pd
 import os
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -20,7 +21,7 @@ import numpy as np
 # Check if CUDA is available and set the device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
-
+#meta-llama/Meta-Llama-3.1-8B
 # Load the LLaMA 3 8B model and tokenizer
 model_name = "meta-llama/Meta-Llama-3.1-8B"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -173,9 +174,10 @@ def normalize_text(text):
 
 def calculate_accuracy_exact(pred, ref):
     pred_num = extract_numerical_value(pred)
-    actual_num = extract_numerical_value(ref)
-    if pred_num is not None and actual_num is not None:
-      return 1 if pred_num == actual_num else 0 #for num
+    ref_num = extract_numerical_value(ref)
+    #print(f'pred after extraction: {pred_num} \t ref after extraction: {ref_num}')
+    if pred_num is not None and ref_num is not None:
+      return 1 if pred_num == ref_num else 0 #for num
     else:
       return 1 if pred.strip() == ref.strip() else 0 #for text
 
@@ -263,7 +265,7 @@ def process_test_samples(file_path, num_samples,seed=None):
     all_predictions = []
     all_references = []
 
-    for sample in selected_samples:
+    for sample in tqdm(selected_samples, desc="Processing samples", unit="sample"):
         context = sample['context']
         question = sample['question']
         reference_value = str(sample['answer'])
@@ -286,7 +288,7 @@ def process_test_samples(file_path, num_samples,seed=None):
             filtered_count += 1
 
     # Save filtered samples to a new file
-    output_file = 'filtered_test_data_100.json'
+    output_file = 'filtered_test_data_1000.json'
     with open(output_file, 'w') as f:
         json.dump(filtered_samples, f, indent=2)
 
@@ -310,4 +312,4 @@ def process_test_samples(file_path, num_samples,seed=None):
     print(f"Results have been saved to {output_file}")
 
 # Process test samples
-process_test_samples('tat_qa_dataset.json', num_samples=100,seed=9)
+process_test_samples('tat_qa_dataset.json', num_samples=1000,seed=9)
