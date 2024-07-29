@@ -1,0 +1,621 @@
+% MSc dissertation example file, February 2022
+%
+% Leave one of the documentclass lines uncommented to match your degree.
+% You may remove the logo option if it causes problems.
+% Do not change any other options.
+% \documentclass[logo,msc,adi]{infthesis}     % Adv Design Inf
+% \documentclass[logo,msc,ai]{infthesis}      % AI
+% \documentclass[logo,msc,cogsci]{infthesis}  % Cognitive Sci
+% \documentclass[logo,msc,cs]{infthesis}      % Computer Sci
+% \documentclass[logo,msc,cyber]{infthesis}   % Cyber Sec
+% \documentclass[logo,msc,datasci]{infthesis} % Data Sci
+% \documentclass[logo,msc,di]{infthesis}      % Design Inf
+% \documentclass[logo,msc,dsti]{infthesis}    % Data Sci TI
+% \documentclass[logo,msc,inf]{infthesis}     % Informatics
+\documentclass[logo,msc]{infthesis}           % degree unspecified, do not change except to add your degree
+%%%%%%%%%%%%%%%%%%%%%%%%
+% Understand any problems and seek approval before assuming it's ok to remove ugcheck.
+\usepackage{msccheck}
+
+% Include any packages you need below, but don't include any that change the page
+% layout or style of the dissertation. By including the ugcheck package above,
+% you should catch most accidental changes of page layout though.
+
+\usepackage{microtype} % recommended, but you can remove if it causes problems
+
+% MY PACKAGES 
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+
+
+% ends here packages
+\begin{document}
+\begin{preliminary}
+
+\title{Large language model number handling in the Finance Domain}
+
+\author{Anant Raj}
+
+\date{\today}
+
+\abstract{
+% This skeleton demonstrates how to use the \texttt{infthesis} style for
+% MSc dissertations in the School of Informatics. It also emphasises the
+% page limit and associated style restrictions for Informatics dissertations
+% with course code \texttt{INFR11077}. If your degree has a different project
+% course code, then it is likely to have different formatting rules.
+% The file \texttt{skeleton.tex} generates this document and should be used as a
+% starting point for your thesis. Replace this abstract text with a concise
+% summary of your report.
+This research project focuses on enhancing the performance of large language models (LLMs) in finance by improving their capabilities in numerical data handling and financial reasoning. By employing a mixture of financial datasets our approach encompasses specialized instruction tuning methods alongside the strategic use of specialised external computational tools for specific tasks. The project rigorously fine-tuned open-source LLMs like Llama2,Llama3 and evaluate their performance in comparison with commercial models such as GPT-4. The principal aim is to forge a robust framework for the processing and analysis of financial data, which minimizes human intervention while enhancing accuracy and efficiency, thus redefining the benchmark for AI applications in financial analysis.
+}
+
+\maketitle
+
+\newenvironment{ethics}
+   {\begin{frontenv}{Research Ethics Approval}{\LARGE}}
+   {\end{frontenv}\newpage}
+
+\begin{ethics}
+% \textbf{Instructions:} \emph{Agree with your supervisor which
+% statement you need to include. Then delete the statement that you are not using,
+% and the instructions in italics.\\
+% \textbf{Either complete and include this statement:}}\\ % DELETE THESE INSTRUCTIONS
+% %
+% % IF ETHICS APPROVAL WAS REQUIRED:
+% This project obtained approval from the Informatics Research Ethics committee.\\
+% Ethics application number: ???\\
+% Date when approval was obtained: YYYY-MM-DD\\
+% %
+% \emph{[If the project required human participants, edit as appropriate, otherwise delete:]}\\ % DELETE THIS LINE
+% The participants' information sheet and a consent form are included in the appendix.\\
+%
+% IF ETHICS APPROVAL WAS NOT REQUIRED:
+% \textbf{\emph{Or include this statement:}}\\ % DELETE THIS LINE
+This project was planned in accordance with the Informatics Research
+Ethics policy. It did not involve any aspects that required approval
+from the Informatics Research Ethics committee.
+
+\standarddeclaration
+\end{ethics}
+
+
+\begin{acknowledgements}
+% Any acknowledgements go here.
+
+I am profoundly grateful to my supervisor, Alexandra Birch, whose expertise, understanding, and patience added substantially to my graduate experience. I deeply appreciate the countless hours she spent discussing experimental results with me and her insightful comments that continually inspired me throughout this journey. Her comprehensive guidance and unwavering support were instrumental in the successful completion of this project.
+
+I extend my heartfelt thanks to Mateusz, whose encouragement was a beacon of light during times of struggle. His motivating words helped me navigate through the challenging moments of my research.
+
+My sincere gratitude also goes out to my friends and family, whose unending support and love provided me with strength and encouragement. Their belief in my abilities sustained me throughout this academic endeavor.
+
+This dissertation stands as a testament not only to my efforts but also to the valuable contributions of all those who supported me along the way. Thank you.
+
+\end{acknowledgements}
+
+
+\tableofcontents
+\end{preliminary}
+
+
+\chapter{Introduction}
+
+The intersection of Large Language Models (LLMs) and the financial industry represents a frontier of considerable promise and complexity. As documented by recent advancements, LLMs such as ChatGPT and GPT-4 have showcased remarkable proficiencies across a spectrum of Natural Language Processing (NLP) tasks, driven by sophisticated training methodologies including reinforcement learning from human feedback (RLHF) and masked language model objectives \cite{li2023chatgpt}. However, recent advancements have highlighted their limitations, such as the inability to access current information, difficulties with arithmetic and mathematical computations, and a propensity to generate inaccurate responses due to hallucinations \cite{schick2023toolformer,li2024dawn}. Despite being trained on diverse datasets covering multiple genres and subjects, their effectiveness in specialized domains like finance still necessitates further scrutiny.
+
+In the financial arena, LLMs have begun to play an indispensable role, aiding in tasks such as investment sentiment analysis, financial named entity recognition, question-answering systems, and stock market prediction, which assist financial analysts in navigating complex datasets and predictive models. Methods such as multi-field LLMs and instruction fine-tuned LLMs have been explored to enhance the efficacy of generated results in the financial context \cite{lee2024survey}. Nonetheless, the nuanced understanding and processing of financial data by LLMs — critical for applications ranging from market analysis to investment strategy formulation — remain at an early stage for empirical study and innovation.
+
+This project aims to investigate various number-handling strategies to fine-tune a large language model using instruction data, with the goal of achieving optimal performance in finance-related downstream tasks, particularly those involving currency or numerical questions. A diverse set of financial datasets has been selected, encompassing tabular data, contextual information, relation extraction, and Conversational Finance Question Answering. These complex numerical reasoning datasets provide a robust foundation for generalizing across a wide range of financial tasks.
+
+Initially, baseline performance was assessed on open-source models such as Llama2 and the newly launched Llama3 using these datasets. It is well known that large language models (LLMs) often struggle with numerical data, particularly in tasks requiring numerical reasoning, and our results were consistent with this observation. Several fine-tuning approaches were explored, starting with the Llama2-chat 7B model and subsequently extending experiments to the latest Llama3 8B model. Recognizing that a single prompting technique does not suffice for all scenarios, various techniques were experimented with, yielding notable results detailed in the experiment section.
+
+In our study, we venture beyond the traditional confines of language model applications, drawing upon the groundbreaking work of Schick et al. (2023) who utilized external tools to elevate the performance of models handling numerical values over those processing textual data. This approach aligns with cutting-edge developments like LangChain agents and function calling, which empower models to leverage external capabilities effectively.
+
+Our experiments are not merely replications but expansions, tailored to explore uncharted territories in financial analytics. We innovated upon existing methodologies by implementing a sophisticated pipeline structure. Initially, financial datasets serve as input for code-generating large language models (LLMs), tasked with crafting precise Python scripts based on the nuanced demands of the financial context. These scripts are then executed by another model functioning within a Python REPL environment, aimed at delivering the final outputs.
+
+Given the inherent challenges of computational limitations and the absence of open-source LLMs capable of processing extensive contextual inputs typical of financial datasets, we proceeded under the hypothesis that, with optimal resources and fine-tuning, our language model could refine its script generation to achieve unprecedented accuracy levels, potentially surpassing current benchmarks. Our pilot study, utilizing a compact dataset sample with the 'facebook/opt-1.3b' model in conjunction with LangChain's Python agent, python\_repl, yielded promising results. These initial findings not only demonstrate the model's capability but also mark a pivotal first step towards scaling up and enhancing the precision and analytical prowess of LLMs when faced with larger and more complex data sets. This sets a robust foundation for future research to build upon, aiming for significant advancements in the application of LLMs to financial tasks.
+% Schick et al. (2023) have conducted noteworthy research utilizing external tools to address the suboptimal performance of models with numerical values compared to textual information. Separately, recent advancements such as LangChain agents and function calling have been developed to enable models to call agents and use external tools. Our experiments draw inspiration from both these approaches, attempting to integrate their usage \cite{schick2023toolformerlanguagemodelsteach}. However, these techniques have not yet been extended to financial tasks or number handling. Our experiments extended these advancements by employing a pipeline structure: first, inputs from the financial datasets were fed into code generation LLMs to generate accurate Python scripts based on contextual input; these scripts were then passed on to another model to generate the final answer using Python REPL. Despite being constrained by computational limits and time constraints, particularly with no open-source LLMs capable of generating correct Python scripts from long context inputs typically found in financial datasets, we proceeded with the hypothesis that, given proper resources and tuning, a language model could generate precise scripts to achieve higher accuracy, surpassing the state of the art (SOTA). An experiment was conducted using a small dataset sample, wherein a small open-source model, 'facebook/opt-1.3b', utilized LangChain's Python agent, python\_repl, to generate promising results. These results serve as a valuable starting point for scalability and enhancing the precision and reasoning capability of LLMs with larger data samples.
+
+% The preliminary material of your report should contain:
+% \begin{itemize}
+% \item
+% The title page.
+% \item
+% An abstract page.
+% \item
+% Declaration of ethics and own work.
+% \item
+% Optionally an acknowledgements page.
+% \item
+% The table of contents.
+% \end{itemize}
+
+% As in this example \texttt{skeleton.tex}, the above material should be
+% included between:
+% \begin{verbatim}
+% \begin{preliminary}
+%     ...
+% \end{preliminary}
+% \end{verbatim}
+% This style file uses roman numeral page numbers for the preliminary material.
+
+% The main content of the dissertation, starting with the first chapter,
+% starts with page~1. \emph{\textbf{The main content must not go beyond page~40.}}
+
+% The report then contains a bibliography and any appendices, which may go beyond
+% page~40. The appendices are only for any supporting material that's important to
+% go on record. However, you cannot assume markers of dissertations will read them.
+
+% You may not change the dissertation format (e.g., reduce the font size, change
+% the margins, or reduce the line spacing from the default 1.5 spacing). Be
+% careful if you copy-paste packages into your document preamble from elsewhere.
+% Some \LaTeX{} packages, such as \texttt{fullpage} or \texttt{savetrees}, change
+% the margins of your document. Do not include them!
+
+% Over-length or incorrectly-formatted dissertations will not be accepted and you
+% would have to modify your dissertation and resubmit. You cannot assume we will
+% check your submission before the final deadline and if it requires resubmission
+% after the deadline to conform to the page and style requirements you will be
+% subject to the usual late penalties based on your final submission time.
+
+% \section{Using Sections}
+
+% Divide your chapters into sub-parts as appropriate.
+
+% \section{Citations}
+
+% Citations (such as \cite{P1} or \cite{P2}) can be generated using
+% \texttt{BibTeX}. For more advanced usage, we recommend using the \texttt{natbib}
+% package or the newer \texttt{biblatex} system.
+
+% These examples use a numerical citation style. You may use any consistent
+% reference style that you prefer, including ``(Author, Year)'' citations.
+
+\chapter{Background}
+
+% This chapter aims to remind readers of background knowledge of this project. Section 2.1 introduces the structure of transformers. Self-attention mechanism of the transformer is described in section 2.2. Section 2.3 discusses position embeddings in detail. Section 2.4 introduces the background knowledge of residual connections.
+
+The field of natural language processing (NLP) has experienced a profound transformation in recent years, primarily propelled by the introduction of transformer-based models and the subsequent development of large language models (LLMs). This chapter presents an overview of the evolution of these models. Section 2.1 introduces the architecture of transformers, detailing their fundamental components and operational principles. Section 2.2 delineates the progression of Large Language Models, outlining key milestones and innovations. Section 2.3 examines the advancements in LLM capabilities, highlighting their impact on the field of NLP.
+
+% their architectural innovations, key advancements in capabilities, and the challenges they face in handling numerical data and reasoning tasks, particularly in the context of finance.
+
+\section{The Transformer Architecture: A Paradigm Shift}
+The introduction of the Transformer architecture by Vaswani et al. (2017) marked a pivotal moment in NLP, fundamentally changing the approach to sequence transduction problems. Unlike previous recurrent or convolutional neural networks, the Transformer relies solely on attention mechanisms, enabling more efficient processing of sequential data and facilitating the training of much larger models \cite{vaswani2023attentionneed}.
+
+Key components of the Transformer architecture include:
+\begin{itemize}
+
+ \item Self-Attention Mechanism This allows the model to weigh the importance of different parts of the input sequence when processing each element, enabling capture of long-range dependencies more effectively than previous architectures.
+
+ \item Multi-Head Attention By applying multiple attention operations in parallel, the model can capture different types of relationships within the data simultaneously.
+\item Positional Encoding: To compensate for the lack of inherent sequential processing, positional encodings are added to input embeddings, allowing the model to leverage sequence order.
+
+ \item Feed-Forward Networks These process the outputs of the attention layers, adding non-linearity and increasing the model's capacity to learn complex functions.
+
+ \item Layer Normalization and Residual Connections These components facilitate training of deep networks by stabilizing the learning process and mitigating the vanishing gradient problem.
+\end{itemize}
+The Transformer's ability to process input sequences in parallel, rather than sequentially, led to significant improvements in training efficiency and model performance. This architecture laid the groundwork for the development of increasingly large and sophisticated language models.
+
+\section{Evolution of Large Language Models}
+
+Building upon the Transformer architecture, researchers developed a series of increasingly powerful language models:
+
+\subsection*{BERT: Bidirectional Encoders}
+
+BERT (Bidirectional Encoder Representations from Transformers), introduced by Devlin et al. (2018), represented a significant advancement in pre-training techniques \cite{devlin2019bertpretrainingdeepbidirectional}. 
+
+Key innovations of BERT include:
+
+\begin{itemize}
+ 
+   \item Bidirectional Context: Unlike previous models that processed text either left-to-right or right-to-left, BERT considers both left and right context simultaneously, enabling a more nuanced understanding of language.
+   \item Masked Language Model (MLM) Pre-training: BERT is trained to predict masked words in a sentence, forcing it to learn contextual representations of words.
+   \item Next Sentence Prediction: This additional pre-training task helps BERT understand relationships between sentences.
+\end{itemize}
+
+BERT's approach led to state-of-the-art performance across a wide range of NLP tasks, demonstrating the power of large-scale, unsupervised pre-training.
+
+\subsection*{GPT Series: Scaling Up}
+
+The GPT (Generative Pre-trained Transformer) series, developed by OpenAI, pushed the boundaries of model size and capabilities:
+\begin{itemize}
+ 
+   \item GPT : Introduced the concept of fine-tuning a large, pre-trained language model for specific downstream tasks \cite{radford2018improving}.
+   \item GPT-2 : Scaled up the model size significantly (1.5 billion parameters) and demonstrated impressive text generation capabilities \cite{radford2019language}.
+   \item GPT-3 : With 175 billion parameters, GPT-3 marked a leap in scale and showcased strong few-shot learning abilities, reducing the need for task-specific fine-tuning \cite{brown2020language}.
+\end{itemize}
+The GPT series highlighted the benefits of scale in language models, showing that larger models could exhibit more flexible and generalizable language understanding and generation capabilities.
+
+\subsection*{Other Notable Models}
+\begin{itemize}
+
+    \item T5 : Unified various NLP tasks into a single text-to-text format, demonstrating the versatility of the transformer architecture \cite{raffel2020exploring}.
+    \item BART : Combined the bidirectional encoder of BERT with the autoregressive decoder of GPT, showing strong performance on both text comprehension and generation tasks \cite{lewis2019bart}.
+\end{itemize}
+These models further expanded the capabilities of LLMs, showing their potential to handle a diverse range of NLP tasks within a single architectural framework.
+
+\section{Advancements in LLM Capabilities}
+As LLMs evolved, several key advancements emerged:
+\subsection*{Scaling Laws}
+Kaplan et al. (2020) established important relationships between model size, dataset size, and computational budget \cite{kaplan2020scaling}. Their findings showed that model performance scales predictably with these factors, guiding the development of more efficient and powerful models. This work provided a theoretical foundation for the "bigger is better" approach in language model development.
+\subsection*{Few-shot and Zero-shot Learning}
+Brown et al. (2020) demonstrated with GPT-3 that sufficiently large models could perform tasks with minimal or no task-specific training examples \cite{brown2020language}. This capability, known as few-shot and zero-shot learning, opened new possibilities for creating more flexible and adaptable AI systems.
+\subsection*{Instruction Tuning}
+Wei et al. (2022) showed that fine-tuning models on diverse sets of instructions could significantly improve their ability to follow natural language prompts \cite{wei2022finetunedlanguagemodelszeroshot}. This technique, known as instruction tuning, enhanced the versatility of LLMs across various tasks and made them more aligned with human intentions.
+\subsection*{Chain-of-Thought Prompting}
+Another significant advancement came from Wei et al. (2022), who demonstrated that prompting models to generate step-by-step reasoning could substantially improve their performance on complex tasks, including those involving numerical reasoning \cite{wei2022chain}. This technique, called chain-of-thought prompting, showed that LLMs could be guided to break down complex problems into more manageable steps, mirroring human problem-solving processes.
+\subsection*{Reinforcement Learning from Human Feedback (RLHF)}
+Ouyang et al. (2022) introduced techniques to align language models with human preferences using reinforcement learning \cite{ouyang2022training}. This approach, known as RLHF, led to the development of models that could produce more helpful, safe, and contextually appropriate outputs.
+% A dissertation usually contains several chapters.
+
+\chapter{Related Work}
+
+The application of Large Language Models (LLMs) in the financial sector has been a subject of intense research in recent years, with studies exploring their potential and limitations across various financial tasks. This chapter reviews key works in this field, highlighting methodologies, findings, and persistent research gaps.
+General-purpose LLMs like GPT-3, ChatGPT, and GPT-4 have demonstrated broad capabilities across various financial tasks. Li et al. (2023) conducted a comprehensive evaluation of these models using multiple benchmark datasets \cite{li2023large}. Their methodology involved fine-tuning these models on financial data and comparing their performance against specialized financial models. While the general-purpose LLMs often outperformed specialized models in tasks like sentiment analysis and named entity recognition, they struggled with complex financial reasoning tasks. This highlights a significant research gap: the need for LLMs that can perform deep, domain-specific financial analysis while maintaining their general language understanding capabilities.
+% Aziz et al. (2023) further explored this gap by investigating the performance of GPT-3.5 and GPT-4 in financial sentiment analysis and market prediction tasks [2]. Their methodology involved prompting the models with historical market data and news headlines to generate price predictions. While the models showed promise in sentiment analysis, their performance in market prediction was inconsistent, especially in volatile market conditions. This underscores another research gap: the need for LLMs that can effectively process temporal financial data and adapt to rapidly changing market conditions.
+Recognizing these limitations, researchers have begun developing models specifically tailored for the financial domain. Wu et al. (2023) introduced BloombergGPT, a 50-billion parameter language model trained on a vast corpus of financial data \cite{wu2023bloomberggptlargelanguagemodel}. Their approach involved pretraining the model on a mix of general and financial text data, followed by fine-tuning on specific financial tasks. BloombergGPT demonstrated significant improvements over general-purpose models in tasks such as financial sentiment analysis and question answering. However, the authors noted that the model still struggled with complex numerical reasoning, highlighting a persistent gap in LLMs' ability to perform accurate financial calculations consistently.
+Wang et al. (2023) proposed FinGPT, leveraging instructional tuning to adapt LLMs for financial applications \cite{wang2023fingptinstructiontuningbenchmark}. Their methodology involved fine-tuning LLMs on a diverse set of financial instructions and tasks. The authors emphasized the importance of systematic evaluation across various financial competencies, from basic tasks to complex multitasking scenarios. While FinGPT showed improvements on text-based financial data, it overlooked other critical financial data forms such as numerical and tabular data, which are pivotal for comprehensive financial analysis.
+
+Efforts to enhance LLM capabilities for finance have taken various forms. Chen et al. (2022) introduced the CONVFINQA dataset, focusing on complex numerical reasoning in conversational finance \cite{chen2022convfinqa}. Their work involved creating a dataset of multi-turn financial conversations that require chained reasoning over numbers. They experimented with both neural-symbolic approaches and prompting-based methods, finding that even state-of-the-art LLMs struggled with complex, multi-step financial calculations. This work highlights a critical research gap: the need for LLMs that can perform reliable, multi-step numerical reasoning in financial contexts.
+Addressing the challenge of improving LLMs' instruction-following capabilities, Wang et al. (2023) proposed Self-Instruct, a method for enhancing LLMs through self-generated instructions \cite{wang2023selfinstruct}. While not specifically focused on finance, their approach of using LLMs to generate their own training data could potentially be applied to financial domains. The authors demonstrated a 33 percent improvement in GPT-3's general instruction-following capabilities. However, they noted limitations in the quality and diversity of self-generated instructions, pointing to a research gap in developing more sophisticated self-improvement mechanisms for LLMs.
+Araci (2023) introduced FinBERT, a BERT-based model specifically designed for financial sentiment analysis \cite{araci2019finbertfinancialsentimentanalysis}. The author's methodology involved pretraining BERT on a large corpus of financial texts and fine-tuning it on labeled financial sentiment data. While FinBERT showed improvements over general-purpose models in sentiment classification tasks, it was limited to sentiment analysis and did not address more complex financial reasoning tasks, highlighting the need for more versatile financial LLMs.
+The challenge of context modeling and reasoning in LLMs, crucial for many financial applications, was addressed by Zhao et al. (2023) in their work on natural language-based context modeling and reasoning with LLMs \cite{xiong2023naturallanguagebasedcontext}. They outlined various strategies for improving LLMs' ability to understand and utilize context, including prompt engineering, few-shot learning, and retrieval-augmented generation. While their work was not finance-specific, their findings have significant implications for financial applications. For instance, improved context modeling could enhance LLMs' ability to understand complex financial narratives or multi-turn financial conversations. 
+Addressing the computational challenges of fine-tuning large models for specific tasks, Dettmers et al. (2023) proposed QLoRA (Quantized Low-Rank Adaptation), a parameter-efficient fine-tuning method \cite{dettmers2024qlora}. Their approach involves quantizing the pretrained language model to 4 bits, adding trainable low-rank adapters, and using a novel preconditioner which they term "Paged Optimizers" to handle GPU memory constraints. This method could potentially allow for more efficient adaptation of large, general-purpose LLMs to specific financial tasks without the need for extensive computational resources. 
+% However, the authors noted that while QLoRA maintained performance comparable to full fine-tuning, there were still challenges in adapting models to tasks requiring specialized knowledge, pointing to a persistent gap in efficiently transferring domain-specific financial knowledge to LLMs.
+Recent advancements in LLM capabilities have opened new avenues for their application in finance. Schick et al. (2023) introduced the Toolformer approach, which enables language models to learn to use external tools through self-supervised learning \cite{schick2023toolformer}. Their methodology involved augmenting a pretraining dataset with tool-use examples, allowing the model to learn when and how to call external tools. While not specifically focused on finance, this approach has significant implications for financial applications. For instance, a Toolformer-like model could potentially learn to access real-time market data, financial calculators, or regulatory databases, addressing the research gap of integrating external financial tools and data sources with LLMs. However, the authors noted challenges in tool selection and result interpretation, highlighting a persistent gap in LLMs' ability to reason about tool outputs more so in a complex domains like finance.
+% The ethical and regulatory implications of using LLMs in finance were examined by Barr et al. (2022) [9]. Their review raised concerns about the potential for AI models to perpetuate biases or make decisions that could have significant economic impacts. This work underscores a critical research gap: the need for LLMs that can navigate complex financial regulations and adhere to ethical standards in financial decision-making.
+% Tan et al. (2023) explored the use of LLMs for automated financial report generation [10]. Their methodology involved fine-tuning GPT-3 on a dataset of financial reports and testing its ability to generate coherent and accurate reports from financial data. While the model showed promise in generating human-like reports, the authors noted issues with numerical consistency and factual accuracy, highlighting the need for LLMs that can maintain numerical precision over long-form financial text generation.
+% The issue of explainability in AI-driven financial analysis was explored by Linardatos et al. (2021) [7]. Their comprehensive review of interpretability methods in machine learning highlighted the unique challenges posed by the complexity of LLMs. The authors emphasized the need for explainable AI in finance, pointing to a significant research gap: developing LLMs that can not only provide accurate financial insights but also explain their reasoning in a way that is transparent and comprehensible to financial professionals.
+% In conclusion, while LLMs have shown considerable promise in the financial domain, significant challenges remain. The reviewed works collectively highlight several critical research gaps:
+
+% Developing LLMs that can perform deep, domain-specific financial analysis while maintaining general language understanding.
+% Improving LLMs' ability to process temporal financial data and adapt to rapidly changing market conditions.
+% Enhancing LLMs' capacity for complex, multi-step numerical reasoning in financial contexts.
+% Creating explainable financial LLMs that can articulate their decision-making processes transparently.
+% Designing LLMs that can adhere to financial regulations and ethical standards.
+% Improving the numerical consistency and factual accuracy of LLMs in long-form financial text generation.
+
+% Addressing these gaps will be crucial for the development of LLMs that can truly transform financial analysis and decision-making processes.
+
+% Talk about PEFT, QLORA etc
+\chapter{Methodology}
+This chapter describes the methodology applied in this project. 
+% Section 4.1 defines the dataset selection and preparation
+
+\section{Dataset Selection and Preparation}
+
+\subsection{Merged Dataset Creation}
+
+We have used a mixture of four different financial datasets. The brief summary of these dataset is provided below. The structured sample for each of these dataset after preprocessing is provided in the appendix section. 
+
+\textbf{TAT-QA } contains 16,552 questions associated with 2,757 hybrid contexts from real-world financial reports. The questions typically require a range of data extraction and numerical reasoning skills, including multiplication, comparison, sorting, and their various combinations \cite{zhu-etal-2021-tat}.
+
+\textbf{ConvFinQA } contains 3,892 conversations consisting 14,115 questions from real-world scenario of conversational question answering over financial reports. The dataset is formulated using both textual content and structured table \cite{chen2022convfinqa}. 
+
+\textbf{FINQA } is an expert annotated dataset that contains 8,281 financial QA pairs, along with their numerical reasoning processes. The reasoning processes answering these questions are made of many common calculations in financial analysis, such as addition, comparison, and table aggregation \cite{chen2021finqa}. 
+
+\textbf{FinGPT FinRED-RE } dataset available on Hugging Face is designed for financial relationship extraction tasks. It contains 13.5k rows of data, divided into 11.4k training rows and 2.14k test rows. The dataset features text inputs with associated financial entities and their relationships. The task contains instructions for extracting financial relationships from textual data, utilizing specific relations like employer, industry, and product/material produced \footnote{https://huggingface.co/datasets/FinGPT/fingpt-finred-re}. 
+% \begin{itemize}
+%  \item Datasets Selected To ensure a comprehensive representation of the financial domain, four datasets were chosen:
+%  \begin{itemize}
+%      \item TAT-QA: A dataset focused on tabular financial data.
+%      \item ConvFINQA: A financial question-answering dataset that includes both tables and texts, allowing for diverse data formats.
+%      \item FinQA: Another financial question-answering dataset aimed at enhancing the breadth of question types and data structures.
+%      \item Relation Extraction Dataset: A specialized dataset to assist in extracting relationships between different financial entities and concepts.
+%  \end{itemize}
+% \item 
+
+\textbf{Merged dataset: } The datasets are merged to form a comprehensive unified dataset, balancing various types of financial data to ensure robust coverage of multiple scenarios and data formats encountered in the financial domain. This integration includes tabular data, text-based financial reports, conversational question-answer pairs, and extracted relationships, enhancing the dataset's versatility and applicability for a wide range of financial data analysis tasks. This comprehensive approach improves the ability to analyze diverse financial situations and generalize across tasks, making it valuable for both financial domain applications and general numerical reasoning scenarios.
+% \end{itemize}
+\subsection{Dataset Preprocessing}
+\begin{itemize}
+    \item Algorithm Development: A preprocessing algorithm~\ref{alg:preprocess_financial} was created to prepare the merged dataset for model training. This algorithm ensures that the data follows a unified structure comprising context, questions, and answers.
+    \item Prompt Template: The data was formatted into a specific template prompt format required by both Llama2 7b and Llama3 8b models that are used in this project. This involved:
+    \begin{itemize}
+        \item Data Cleaning: Removing inconsistencies and irrelevant information.
+        \item Normalization: Standardizing numerical values and textual content to maintain uniformity.
+        \item Prompt Structuring: Organizing the data into the structured prompts that the models were originally trained on, ensuring compatibility and effectiveness during fine-tuning. This include use of special tokens and prompt structure of the specific model \footnote{https://llama.meta.com/docs/model-cards-and-prompt-formats/meta-llama-3}. 
+    \end{itemize}
+\end{itemize}
+\begin{algorithm}
+\caption{Preprocessing Merged Dataset}
+\label{alg:preprocess_financial}
+\begin{algorithmic}[1]
+\Procedure{PreprocessDatasets}{}
+    \State Load TAT-QA, ConvFinQA, FinQA, and RelEx datasets
+    \State $combined\_data \gets \emptyset$
+    \For{$dataset \in \{TAT\text{-}QA, ConvFinQA, FinQA, RelEx\}$}
+        \State $processed \gets $ \Call{ProcessDataset}{$dataset$}
+        \State $combined\_data \gets combined\_data \cup processed$
+    \EndFor
+    \State $combined\_data \gets$ \Call{RandomSample}{$combined\_data, \lfloor |combined\_data| / 3 \rfloor$}
+    \State Split $combined\_data$ into $train\_data$ (90\%) and $test\_data$ (10\%)
+    \State \Return $train\_data, test\_data$
+\EndProcedure
+
+\Procedure{ProcessDataset}{$dataset$}
+    \State $processed \gets \emptyset$
+    \For{each $sample \in dataset$}
+        \State $(context, question, answer) \gets$ \Call{ExtractInfo}{$dataset, sample$}
+        \State $processed \gets processed \cup \{(context, question, answer)\}$
+    \EndFor
+    \State \Return $processed$
+\EndProcedure
+
+\Procedure{ExtractInfo}{$dataset, sample$}
+    \If{$dataset = TAT\text{-}QA$}
+        \State $context \gets$ Combine paragraphs and format table
+        \For{each $q \in sample.questions$}
+            \State \Return $(context, q.question, q.answer)$
+        \EndFor
+    \ElsIf{$dataset = ConvFinQA$}
+        \State \Return $(sample.input, sample.instruction + \text{ instructions}, sample.output)$
+    \ElsIf{$dataset = FinQA$}
+        \State $context \gets$ Combine pre\_text, post\_text, and table
+        \State \Return $(context, sample.qa.question, sample.qa.answer)$
+    \ElsIf{$dataset = RelEx$}
+        \State \Return $(sample.input, sample.instruction, sample.output)$
+    \EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\section{Baseline Model Selection and Evaluation}
+\begin{itemize}
+    \item Baseline Models Used:
+    \begin{itemize}
+        \item meta-llama/Llama-2-7b-hf \footnote{https://huggingface.co/meta-llama/Llama-2-7b-hf}
+        \item meta-llama/Meta-Llama-3-8B \footnote{https://huggingface.co/meta-llama/Meta-Llama-3-8B}
+    \end{itemize}
+    \item Performance Testing: The merged dataset was tested on these baseline models to establish initial performance metrics. This step was crucial for:
+    \begin{itemize}
+        \item Benchmarking: Establishing a reference point for comparing improvements post fine-tuning.
+        \item Identifying Weaknesses: Understanding the initial strengths and weaknesses of the models with raw financial data.
+    \end{itemize}
+\end{itemize}
+\section{Fine-tuning Approaches}
+% \textbf{Objective:} To enhance model performance on the specific task of financial question answering and relation extraction.
+
+\subsection{Training Procedure}
+\subsubsection*{Model Architecture} We employed the Meta-Llama-2-7B-hf and Meta-Llama-3-8B model, a variant of the LLaMA architecture specifically adapted for few-shot learning scenarios. This choice was driven by its recent success in various NLP tasks, particularly those requiring nuanced understanding and generation based on limited context. For the code generation and execution task, we have used the recently launched Meta-Llama-3.1-8B model due to its enhanced ability for code generation tasks.
+
+\subsubsection*{Dataset Preparation} For the first experiment of fine tuning, We curated a dataset from multiple sources as mentioned in section 4.1, aiming to encompass a wide range of financial topics to enhance the model's ability to generalize across diverse financial contexts. The data was split into 90\% for training and 10\% for validation, ensuring a representative distribution of topics in each subset.
+
+For the X experiment, we exclusively used the TAT-QA dataset, following a preprocessing strategy similar to the one outlined in the algorithm~\ref{alg:preprocess_financial}, specifically steps 20-25.
+
+\subsubsection*{Training Details}
+The model was fine-tuned using a quantization-aware training approach, utilizing 4-bit quantization to balance performance with computational efficiency. The BitsAndBytes library facilitated the integration of low-precision arithmetic during training. Quantization is a two-step process, involves normalizing constants to scale vectors into a target range and rounding to the nearest target value. This technique can cause significant quantization loss if weights have outliers. To address this, \textit{bitsandbytes} employs vector-wise quantization and mixed precision decomposition, maintaining performance akin to non-quantized states \cite{j2024finetuningllmenterprise}. Although LLM int8 does not impair performance, it increases inference time due to quantization overhead but significantly reduces memory usage by 71\%, which enabled us to fine tune the models on NVIDIA GPUs.
+Parameter-Efficient Fine-Tuning (PEFT) enhances the performance of pre-trained language models for specific tasks in Natural Language Processing. By adjusting only a subset of the model’s parameters on smaller datasets, PEFT conserves computational resources and time. This method typically involves freezing several layers of the model and fine-tuning only the final layers that directly pertain to the target application, thereby achieving greater efficiency \cite{j2024finetuningllmenterprise}. Low-Rank Adaptation (LoRA) \footnote{https://huggingface.co/docs/diffusers/en/training/lora} is an efficient training technique for large language models that significantly reduces the number of trainable parameters by inserting a smaller set of new weights, which are the only parts trained. This method speeds up training, enhances memory efficiency, and results in much smaller model weights (only a few hundred megabytes), making the models easier to manage and distribute. We employed the LoraConfig from the PEFT library, setting a rank of 16 and an alpha of 64 to finely tune the attention mechanism to our dataset while minimizing hardware needs without extra inference latency. In our experiment fine-tuning the Llama-3-8b model, the original parameter count was 4,582,543,360. With LoRA, we reduced it to 41,943,040 trainable parameters, constituting just 0.915\% of the total parameters. This reduction underscores the efficiency of LoRA in managing computational resources.
+
+% all params: 4,582,543,360 || trainable params: 41,943,040 || trainable%: 0.9152786281546499
+
+In our training setup, we employed a distributed system featuring eight NVIDIA GeForce RTX 3090 GPUs, leveraging PyTorch's DistributedDataParallel (DDP) framework. This choice was informed by insights from the work by Shen Li et. al (2020) which demonstrated DDP's superiority in synchronizing gradients efficiently across multiple GPUs. They noted that DDP minimizes communication overhead and optimizes computation by overlapping gradient reduction with backpropagation \cite{li2020pytorchdistributedexperiencesaccelerating}. This results in enhanced training speed and scalability, crucial for handling large datasets and complex models in a distributed environment. This approach was particularly necessary for fine-tuning Llama models in our resource-constrained environment, where utilizing multiple GPUs for data-parallel training was essential. 
+
+Gradient accumulation \footnote{https://huggingface.co/docs/accelerate/en/usage_guides/gradient_accumulation} allows for the use of larger batch sizes than those limited by hardware memory by summing up gradients over multiple mini-batches and updating the model only after a predefined number of these batches. In our training setup, we managed a batch size of one per device, accumulating gradients over 12 steps. This strategy effectively simulates training with larger batch sizes, optimizing the trade-off between memory usage and training convergence speed.
+
+AdamW is an optimization algorithm that modifies the classic Adam optimizer by decoupling weight decay from the gradient updates \cite{loshchilov2019decoupledweightdecayregularization}. This adjustment allows for more effective and theoretically sound management of weight decay, improving generalization compared to standard weight decay in optimizers like Adam. The modification ensures that the weight decay is applied directly to the weights themselves rather than as part of the gradient descent, which helps in better preserving the training stability and often leads to better performance on validation and test datasets. We utilized the AdamW optimizer with a learning rate of \textsc{2e-4}, chosen based on preliminary testing to ensure rapid convergence without compromising stability. The model underwent training over five epochs, incorporating early stopping based on validation loss to mitigate overfitting, thus enhancing model generalizability and performance efficiency.
+
+In our X (or last) experiment, conducted on a Google Colab environment with a single NVIDIA A100 40GB GPU, we utilized the newly released model \textsc{meta-llama/Meta-Llama-3.1-8B} model to generate Python code for financial analysis, employing a novel approach without fine-tuning the model. 
+% Instead, we used few-shot learning techniques, leveraging an improved prompt template that included context, a question, and Python code examples, with a focus on proper formatting using actual newline characters.
+
+% To select the most relevant examples for the model, we employed TF-IDF vectorization and cosine similarity measures. This approach ensured that the examples used in the prompt were highly pertinent to the task at hand, enhancing the model's ability to generate accurate and executable code. 
+\subsubsection*{Evaluation Strategy}
+Model performance was periodically evaluated on the validation set at the end of a predefined step in the training setup.
+
+%This section of a paper would typically be accompanied by citations to relevant works, particularly for the methods used (like distributed training frameworks, few-shot learning techniques, etc.), and could include sub-sections with more detailed explanations of the dataset, model configuration, and specific training parameters if needed. Additionally, including figures or tables with interim performance metrics or final evaluation results could further enrich the section.
+
+\subsubsection*{Few-Shot Example Configuration}
+In the experiments 5.? section we have mentioned the results using various few shot learning techniques. Few-shot learning (FSL) involves training models to recognize categories from very limited examples. One-shot learning (OSL) refers to learning tasks where only a single example per rare category is available. Zero-shot learning (ZSL), meanwhile, deals with categories for which no examples are provided \cite{billion2024low}. Suvarna et al. (2019) discusses the challenges and techniques of generalization in few-shot learning, emphasizing that while machines need numerous examples to learn like humans, they lack certain cognitive functions. In contrast to earlier methods requiring human intervention for learning representations, modern deep learning autonomously learns these representations. However, learning effective representations from few examples remains difficult. Deep models require diverse, \textit{representative examples} to generalize well but often struggle in few-shot scenarios due to the scarcity of such examples \cite{kadam2020review}.
+To tackle the challenges of few-shot learning, we developed a strategy that utilizes both relevant and random examples. The selection of relevant examples is based on cosine similarity measurements between the embeddings of training samples and a predefined set of few-shot examples. These embeddings are generated using the SentenceTransformer model, specifically "all-MiniLM-L6-v2," which provides a dense representation of text ideal for similarity assessments. The selection process is detailed in Algorithm~\ref{alg:precomputeExamples}, where \textsc{top\_k} indicates the number of relevant samples calculated. In our experiments, \textsc{top\_k} is set to 2 due to memory constraints and the context length limitations of the Llama-2-7b-hf and Llama-3-8b models, which are 4096 and 8192 tokens, respectively. The parameters \textit{context\_weight} and \textit{question\_weight} are both set to 0.5, reflecting the equal importance of context and questions in datasets such as ConvFinQA, where the history and the final question are crucial. This approach ensures that no input is truncated during training, although it limits our ability to test performance with a larger number of examples, i.e., a much higher \textsc{top\_k}.
+
+In Experiment -X, we used few-shot learning techniques, leveraging an improved prompt template that included context, a question, and Python code examples, with a focus on proper formatting using actual newline characters.
+To select the most relevant examples for the model, we employed TF-IDF vectorization and cosine similarity measures. This approach ensured that the examples used in the prompt were highly pertinent to the task at hand, enhancing the model's ability to generate accurate and executable code.
+
+
+\begin{algorithm}
+\caption{Precompute Relevant Examples for Few-Shot Learning}
+\label{alg:precomputeExamples}
+\begin{algorithmic}[1]
+\Function{GetEmbeddings}{text}
+    \State inputs $\gets$ embedding\_tokenizer(text, return\_tensors='pt', padding=True, truncation=True)
+    \State embedding $\gets$ embedding\_model(**inputs).last\_hidden\_state.mean(dim=1).cpu().numpy()
+    \State \Return embedding[0]
+\EndFunction
+
+\Function{PrecomputeRelevantExamples}{dataset, few\_shot\_examples, top\_k, context\_weight, question\_weight}
+    \State few\_shot\_context\_embeddings $\gets$ [GetEmbeddings(ex["context"]) for ex in few\_shot\_examples]
+    \State few\_shot\_question\_embeddings $\gets$ [GetEmbeddings(ex["question"]) for ex in few\_shot\_examples]
+    \State relevant\_examples\_map $\gets$ \{\}
+    \For{idx, item in enumerate(dataset)}
+        \State context\_embedding $\gets$ GetEmbeddings(item['context'])
+        \State question\_embedding $\gets$ GetEmbeddings(item['question'])
+        \State context\_similarities $\gets$ cosine\_similarity([context\_embedding], few\_shot\_context\_embeddings)[0]
+        \State question\_similarities $\gets$ cosine\_similarity([question\_embedding], few\_shot\_question\_embeddings)[0]
+        \State combined\_similarities $\gets$ context\_weight * context\_similarities + question\_weight * question\_similarities
+        \State most\_relevant\_indices $\gets$ argsort(combined\_similarities)[-top\_k:][::-1]
+        \State relevant\_examples\_map[str(idx)] $\gets$ most\_relevant\_indices.tolist()
+    \EndFor
+    \State \Return relevant\_examples\_map
+\EndFunction
+
+% \Function{SaveRelevantExamples}{relevant\_examples\_map, filename}
+%     \State Open filename as f
+%     \State json.dump(relevant\_examples\_map, f)
+% \EndFunction
+
+% \Function{LoadRelevantExamples}{filename}
+%     \State Open filename as f
+%     \State \Return json.load(f)
+% \EndFunction
+
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Post Processing Algorithm}
+
+During inference, the model generates responses based on varying prompt templates, which differ across experiments and models. Even with the same model, the prompts vary depending on whether we use few-shot prompts or additional chain-of-thought prompting to guide the model to generate explanations. Consequently, a robust post-processing algorithm is necessary. Algorithm~\ref{alg:postprocess_output} presents a generic post-processing approach used during inference and evaluation, with slight modifications based on the model's output response. The code for all post-processing steps is available in my Github Repo\footnote{https://github.com/rjanant/disseration}.
+\begin{algorithm}
+\caption{Post-Processing Model Output}
+\label{alg:postprocess_output}
+\begin{algorithmic}[1]
+\Function{PreprocessOutput}{output}
+    \State \textbf{Input:} Model's output string
+    \State \textbf{Pattern Matching:} Use regex to find the answer section
+    \State answer\_pattern $\gets$ 
+    \text{r"Answer (including calculation steps and final answer,}
+    \State \text{use '\\n' for line breaks):(.*?)}
+    \State \text{(?:\\n\\nContext:|\$)"}
+    \State match $\gets$ \texttt{re.search(answer\_pattern, output, re.DOTALL)}
+    \If{match is not None}
+        \State answer $\gets$ match.group(1).strip()
+        \State lines $\gets$ [line.strip() for line in answer.split('\textbackslash n') if line.strip()]
+        \State \Return lines[0] \textbf{if} lines \textbf{else} ""
+    \Else
+        \State \Return ""
+    \EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+% \textbf{Purpose: }To refine the generated outputs, especially in relation extraction where over-extraction was an issue.
+% \vspace{1}
+% \textbf{Algorithm Features: }
+% \begin{itemize}
+%     \item Filtering Mechanism: Implementing rules to discard irrelevant extractions.
+%     \item Relevance Scoring: Scoring extracted values to prioritize and retain only the most relevant ones.
+% \end{itemize}
+
+\section{Evaluation and Iteration}
+\subsection{Permissive Accuracy}
+We have designed a permissive accuracy measure that accommodates minor precision differences by allowing slight deviations in decimal points within an alpha threshold. This measure is particularly useful in financial contexts, where exact numerical precision may not always be critical. The method involves extracting numerical values and comparing them within a tunable alpha difference.
+
+For threshold setting, we define acceptable deviation ranges, ensuring flexibility in various applications. This measure is especially relevant in scenarios like relational extraction, where generated outputs are textual values. In such cases, the SequenceMatcher is used for string comparison, returning 1 if the similarity exceeds 0.9 or if key parts of the prediction and reference match. This approach is beneficial when the model generates the correct answer but includes additional values, which can be ignored. Additionally, we have an exact match function to report precise match accuracy, ensuring comprehensive evaluation of model performance.
+\begin{algorithm}
+\caption{Calculate Accuracy with Some Leniency}
+\label{alg:calculate_accuracy_permissive}
+\begin{algorithmic}[1]
+\Function{Permissive\_Accuracy}{predicted, actual}
+    \State \textbf{Input:} predicted, actual
+    \State predicted $\gets$ \texttt{str(predicted).lower().strip()}
+    \State actual $\gets$ \texttt{str(actual).lower().strip()}
+    
+    \State pred\_num $\gets$ \texttt{ExtractNumericalValue(predicted)}
+    \State actual\_num $\gets$ \texttt{ExtractNumericalValue(actual)}
+    
+    \If {pred\_num is not None and actual\_num is not None}
+        \State \textbf{Return} \texttt{int(abs(pred\_num - actual\_num) < 0.001)}
+    \Else
+        \State pred\_words $\gets$ \texttt{predicted.split()}
+        \State actual\_words $\gets$ \texttt{actual.split()}
+        \State similarity $\gets$ \texttt{SequenceMatcher(None, pred\_words, actual\_words).ratio()}
+        \State key\_parts\_match $\gets$ \texttt{all(part in predicted for part in actual.split(':')[-1].split(','))}
+        \State \textbf{Return} \texttt{int(similarity > 0.9 or key\_parts\_match)}
+    \EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+\subsection{Exact Match Accuracy}
+In the context of financial datasets, exact match accuracy is vital for ensuring the precision of numerical output generation. Given the importance of accuracy in financial analysis, even a minor deviation, such as a difference in decimal points, is unacceptable and considered an error. This metric enforces a strict criterion by directly comparing the generated output with the expected answer, ensuring only perfectly matching results are considered correct. 
+% \begin{itemize}
+%     \item Importance: Maintaining a strict criterion for scenarios where exact answers are necessary like in case of numerical output generations where even a decimal point difference will be considered as an error. 
+%     \item Measurement: Comparing the generated output directly with the expected answer for an exact match.
+% \end{itemize}
+\subsection{Inference Phase Metrics}
+\subsubsection{Comprehensive Evaluation: Using a suite of metrics to assess various aspects of model performance}
+\begin{itemize}
+    \item ROUGE: Measures overlap of n-grams between generated and reference texts.
+    \item METEOR: Considers precision, recall, and synonymy for evaluating translation quality.
+    \item BLEU Score: Evaluates the precision of n-grams in generated text against reference.
+    \item BERT Precision, Recall, F1 Score: Uses contextual embeddings to measure semantic similarity.
+    \item GLUE Benchmark: It is a collection of resources for training, evaluating, and analyzing natural language understanding systems across diverse tasks.
+\end{itemize}
+\section{Few-Shot Code Generation \& External Tool Integration}
+\subsection{Subset Selection and Preparation}
+First, a small subset of the dataset was curated specifically for the LangChain integration. This subset was chosen to represent a variety of financial question-answer scenarios that required detailed computational analysis. Each entry in this subset included Python scripts in the answer fields, which were necessary for executing complex calculations. The selection criteria ensured that the subset contained diverse and representative examples that could test the model’s ability to handle different types of financial queries.
+
+\subsection{Python REPL Pipeline Integration}
+To execute the Python scripts included in the answer fields, the subset was run through a Python REPL (Read-Eval-Print Loop) pipeline. The Python REPL pipeline allows for real-time execution of Python code, which is crucial for dynamic and accurate computation of financial data. The model utilized for this integration was the Facebook 1.5b model, known for its robust language processing capabilities.
+
+\subsection{Integration Process}
+
+The integration process involved several technical steps:
+
+\begin{itemize}
+    \item Embedding Python Scripts: The Python scripts were embedded directly into the model prompts. This required careful formatting to ensure the scripts were correctly interpreted and executed by the REPL pipeline.
+    \item Model Adaptation: The Facebook 1.5b model was adapted to recognize and handle the embedded Python scripts. This adaptation involved training the model to parse the script correctly and execute it within the context of the financial question-answering task.
+    \item Output Handling: The outputs generated by the Python scripts were then reintegrated into the model’s response. This involved capturing the output from the REPL pipeline, formatting it appropriately, and ensuring it was included in the final answer provided by the model.
+\end{itemize}
+
+\subsection{Execution and Validation}
+During the inference phase, the integrated system worked as follows:
+
+\begin{itemize}
+    \item Query Processing: When a financial query was posed, the model parsed the question and identified the need for computational analysis.
+    \item Script Execution: The relevant Python script was executed using the Python REPL pipeline. This real-time execution allowed the model to handle complex calculations dynamically.
+    \item Result Integration: The results from the script execution were captured and formatted to be part of the model’s response. This integration ensured that the answer provided was accurate and directly addressed the computational aspects of the query.
+\end{itemize}
+% \section{Other approaches used}
+
+\chapter{Experiments}
+
+\section{Comparative Analysis}
+
+\section{Fine-tuning Strategy Optimization}
+
+\section{Cross-task Generalization}
+
+\section{Results and Discussion}
+
+\chapter{Conclusions}
+
+\section{Limitations}
+
+\section{Future Work}
+% \section{Final Reminder}
+
+% The body of your dissertation, before the references and any appendices,
+% \emph{must} finish by page~40. The introduction, after preliminary material,
+% should have started on page~1.
+
+% You may not change the dissertation format (e.g., reduce the font size, change
+% the margins, or reduce the line spacing from the default 1.5 spacing). Be
+% careful if you copy-paste packages into your document preamble from elsewhere.
+% Some \LaTeX{} packages, such as \texttt{fullpage} or \texttt{savetrees}, change
+% the margins of your document. Do not include them!
+
+% Over-length or incorrectly-formatted dissertations will not be accepted and you
+% would have to modify your dissertation and resubmit. You cannot assume we will
+% check your submission before the final deadline and if it requires resubmission
+% after the deadline to conform to the page and style requirements you will be
+% subject to the usual late penalties based on your final submission time.
+
+\bibliographystyle{plain}
+\bibliography{mybibfile}
+
+
+% You may delete everything from \appendix up to \end{document} if you don't need it.
+\appendix
+
+\chapter{First appendix}
+
+\section{Examples}
+
+Below are some sample examples comparing the model’s predictions to the reference values. The best performing model, highlighted in the table earlier, is used to generate these predictions.
+
+% Any appendices, including any required ethics information, should be included
+% after the references.
+
+% Markers do not have to consider appendices. Make sure that your contributions
+% are made clear in the main body of the dissertation (within the page limit).
+
+% \chapter{Participants' information sheet}
+
+% If you had human participants, include key information that they were given in
+% an appendix, and point to it from the ethics declaration.
+
+% \chapter{Participants' consent form}
+
+% If you had human participants, include information about how consent was
+% gathered in an appendix, and point to it from the ethics declaration.
+
+
+\end{document}
