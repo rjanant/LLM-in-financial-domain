@@ -27,6 +27,20 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,fit,backgrounds}
+%\usepackage[most]{tcolorbox} % Load tcolorbox with most libraries
+\usepackage{tcolorbox}
+\usepackage{amsmath} % For math symbols and align environment
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{longtable} % Allows tables to span multiple pages if needed
+\usepackage{listings} % Include the listings package for formatted code blocks
+\usepackage{xcolor} % For colored text
+\usepackage{geometry}
+
 
 
 % ends here packages
@@ -111,9 +125,14 @@ Initially, baseline performance was assessed on open-source models such as Llama
 
 In our study, we venture beyond the traditional confines of language model applications, drawing upon the groundbreaking work of Schick et al. (2023) who utilized external tools to elevate the performance of models handling numerical values over those processing textual data. This approach aligns with cutting-edge developments like LangChain agents and function calling, which empower models to leverage external capabilities effectively.
 
-Our experiments are not merely replications but expansions, tailored to explore uncharted territories in financial analytics. We innovated upon existing methodologies by implementing a sophisticated pipeline structure. Initially, financial datasets serve as input for code-generating large language models (LLMs), tasked with crafting precise Python scripts based on the nuanced demands of the financial context. These scripts are then executed by another model functioning within a Python REPL environment, aimed at delivering the final outputs.
+Our research work explores the potential of LLMs in processing and analyzing intricate financial datasets, addressing the current limitations in computational power and the scarcity of open-source models capable of handling extensive contextual inputs typical of financial data. Our study operates under the hypothesis that, with optimal resource allocation and fine-tuning, LLMs can significantly enhance their script generation capabilities, potentially surpassing existing benchmarks in numerical accuracy and analytical depth. To investigate this hypothesis, we conducted a two-phase pilot study. Initially, we utilized a compact, curated dataset sample with the \textsc{facebook/opt-1.3b} model, integrated with LangChain's Python agent (\textit{python\_repl}), which yielded promising results. Building on this success, we scaled up our experiment, employing an LLM to generate Python scripts for more extensive financial datasets, executed through Python's \textit{exec \footnote{https://docs.python.org/3/library/functions.html#exec}} function in a pipeline-like structure. While this expanded experiment did not achieve the same level of accuracy as the smaller, handcrafted sample, it produced intriguing results that highlight the critical role of model size and sophistication in code generation based on complex inputs. 
 
-Given the inherent challenges of computational limitations and the absence of open-source LLMs capable of processing extensive contextual inputs typical of financial datasets, we proceeded under the hypothesis that, with optimal resources and fine-tuning, our language model could refine its script generation to achieve unprecedented accuracy levels, potentially surpassing current benchmarks. Our pilot study, utilizing a compact dataset sample with the 'facebook/opt-1.3b' model in conjunction with LangChain's Python agent, python\_repl, yielded promising results. These initial findings not only demonstrate the model's capability but also mark a pivotal first step towards scaling up and enhancing the precision and analytical prowess of LLMs when faced with larger and more complex data sets. This sets a robust foundation for future research to build upon, aiming for significant advancements in the application of LLMs to financial tasks.
+We posit that leveraging larger, more advanced language models with proper fine tuning and prompting could potentially bridge this performance gap. This research not only contributes to the growing body of knowledge at the intersection of natural language processing and financial analytics but also raises compelling questions about the scalability of LLMs in financial analysis, the efficacy of fine-tuning strategies, and the optimal balance between model size, computational efficiency, and analytical accuracy. As we navigate these challenges, our study lays a robust foundation for future investigations, potentially paving the way for significant advancements in how we approach and execute complex financial analyses using open source LLMs.
+
+%Our experiments are not merely replications but expansions, tailored to explore uncharted territories in financial analytics. We innovated upon existing methodologies by implementing a sophisticated pipeline structure. Initially, financial datasets serve as input for code-generating large language models (LLMs), tasked with crafting precise Python scripts based on the nuanced demands of the financial context. These scripts are then executed by another model functioning within a Python REPL and or Python Exec environment, aimed at delivering the final outputs.
+
+%Given the inherent challenges of computational limitations and the absence of open-source LLMs capable of processing extensive contextual inputs typical of financial datasets, we proceeded under the hypothesis that, with optimal resources and fine-tuning, our language model could refine its script generation to achieve unprecedented accuracy levels, potentially surpassing current benchmarks. Our pilot study, utilizing a compact dataset sample with the \textsc{facebook/opt-1.3b} model in conjunction with LangChain's Python agent, python\_repl, yielded promising results. These initial findings not only demonstrate the model's capability but also mark a pivotal first step towards scaling up and enhancing the precision and analytical prowess of LLMs when faced with larger and more complex data sets. Upon receiving promising result using the handcrafted small dataset sample we extended our experiment to use a llm to generate the python script on financial dataset and run the generated script thorugh python's exec function maintaining a pipeline like structure to generate the final results. Although, we couldn't achieve the same level of accuracy as we did with the smaller sample and handcrafted data, we got some pretty interesting results and we hypothesise that using larger language models even better results could be achieved since it mostly depends on the ability of language model on how well it can generate code based on the given input. Several interesting questions arises and we aim to answer some of them in this project and this reserach project sets a robust foundation for future research to build upon, aiming for significant advancements in the application of LLMs to financial tasks. 
+
 % Schick et al. (2023) have conducted noteworthy research utilizing external tools to address the suboptimal performance of models with numerical values compared to textual information. Separately, recent advancements such as LangChain agents and function calling have been developed to enable models to call agents and use external tools. Our experiments draw inspiration from both these approaches, attempting to integrate their usage \cite{schick2023toolformerlanguagemodelsteach}. However, these techniques have not yet been extended to financial tasks or number handling. Our experiments extended these advancements by employing a pipeline structure: first, inputs from the financial datasets were fed into code generation LLMs to generate accurate Python scripts based on contextual input; these scripts were then passed on to another model to generate the final answer using Python REPL. Despite being constrained by computational limits and time constraints, particularly with no open-source LLMs capable of generating correct Python scripts from long context inputs typically found in financial datasets, we proceeded with the hypothesis that, given proper resources and tuning, a language model could generate precise scripts to achieve higher accuracy, surpassing the state of the art (SOTA). An experiment was conducted using a small dataset sample, wherein a small open-source model, 'facebook/opt-1.3b', utilized LangChain's Python agent, python\_repl, to generate promising results. These results serve as a valuable starting point for scalability and enhancing the precision and reasoning capability of LLMs with larger data samples.
 
 % The preliminary material of your report should contain:
@@ -391,24 +410,24 @@ Parameter-Efficient Fine-Tuning (PEFT) enhances the performance of pre-trained l
 
 In our training setup, we employed a distributed system featuring eight NVIDIA GeForce RTX 3090 GPUs, leveraging PyTorch's DistributedDataParallel (DDP) framework. This choice was informed by insights from the work by Shen Li et. al (2020) which demonstrated DDP's superiority in synchronizing gradients efficiently across multiple GPUs. They noted that DDP minimizes communication overhead and optimizes computation by overlapping gradient reduction with backpropagation \cite{li2020pytorchdistributedexperiencesaccelerating}. This results in enhanced training speed and scalability, crucial for handling large datasets and complex models in a distributed environment. This approach was particularly necessary for fine-tuning Llama models in our resource-constrained environment, where utilizing multiple GPUs for data-parallel training was essential. 
 
-Gradient accumulation \footnote{https://huggingface.co/docs/accelerate/en/usage_guides/gradient_accumulation} allows for the use of larger batch sizes than those limited by hardware memory by summing up gradients over multiple mini-batches and updating the model only after a predefined number of these batches. In our training setup, we managed a batch size of one per device, accumulating gradients over 12 steps. This strategy effectively simulates training with larger batch sizes, optimizing the trade-off between memory usage and training convergence speed.
+Gradient accumulation \footnote{https://huggingface.co/docs/accelerate/en/usage\_guides/gradient\_accumulation} allows for the use of larger batch sizes than those limited by hardware memory by summing up gradients over multiple mini-batches and updating the model only after a predefined number of these batches. In our training setup, we managed a batch size of one per device, accumulating gradients over 12 steps. This strategy effectively simulates training with larger batch sizes, optimizing the trade-off between memory usage and training convergence speed.
 
 AdamW is an optimization algorithm that modifies the classic Adam optimizer by decoupling weight decay from the gradient updates \cite{loshchilov2019decoupledweightdecayregularization}. This adjustment allows for more effective and theoretically sound management of weight decay, improving generalization compared to standard weight decay in optimizers like Adam. The modification ensures that the weight decay is applied directly to the weights themselves rather than as part of the gradient descent, which helps in better preserving the training stability and often leads to better performance on validation and test datasets. We utilized the AdamW optimizer with a learning rate of \textsc{2e-4}, chosen based on preliminary testing to ensure rapid convergence without compromising stability. The model underwent training over five epochs, incorporating early stopping based on validation loss to mitigate overfitting, thus enhancing model generalizability and performance efficiency.
 
-In our X (or last) experiment, conducted on a Google Colab environment with a single NVIDIA A100 40GB GPU, we utilized the newly released model \textsc{meta-llama/Meta-Llama-3.1-8B} model to generate Python code for financial analysis, employing a novel approach without fine-tuning the model. 
-% Instead, we used few-shot learning techniques, leveraging an improved prompt template that included context, a question, and Python code examples, with a focus on proper formatting using actual newline characters.
+In the code generation and execution experiment conducted on a Google Colab platform with a single NVIDIA A100 40GB GPU, the recently introduced \textsc{meta-llama/Meta-Llama-3.1-8B} model was deployed to generate Python code for financial analysis. This experiment was distinctive as it did not involve model fine-tuning. Instead, few-shot learning techniques were utilized, which included an enhanced prompt template featuring context, a specific question, and Python code examples, formatted with actual newline characters. To identify the most contextually relevant examples for the model, TF-IDF vectorization \cite{8999168} and cosine similarity metrics were applied. This methodological choice was influenced by the findings of Omid et al. (2019), who observed that despite the prevalent expectation favoring advanced topic models (e.g., Latent Semantic Indexing) and neural models (e.g., Paragraph Vectors) for superior performance across all measures of textual similarity, TF-IDF demonstrated remarkable efficacy. Specifically, TF-IDF excelled in scenarios involving longer and more technical texts and in making more nuanced distinctions among nearest neighbors. This attribute proved particularly advantageous for the current study, which involves complex financial datasets, thereby necessitating a method capable of handling the intricacies and technicalities embedded within such texts.
 
-% To select the most relevant examples for the model, we employed TF-IDF vectorization and cosine similarity measures. This approach ensured that the examples used in the prompt were highly pertinent to the task at hand, enhancing the model's ability to generate accurate and executable code. 
+%significantly improving the model’s capacity to generate precise and executable code.
+
 \subsubsection*{Evaluation Strategy}
 Model performance was periodically evaluated on the validation set at the end of a predefined step in the training setup.
 
 %This section of a paper would typically be accompanied by citations to relevant works, particularly for the methods used (like distributed training frameworks, few-shot learning techniques, etc.), and could include sub-sections with more detailed explanations of the dataset, model configuration, and specific training parameters if needed. Additionally, including figures or tables with interim performance metrics or final evaluation results could further enrich the section.
 
 \subsubsection*{Few-Shot Example Configuration}
-In the experiments 5.? section we have mentioned the results using various few shot learning techniques. Few-shot learning (FSL) involves training models to recognize categories from very limited examples. One-shot learning (OSL) refers to learning tasks where only a single example per rare category is available. Zero-shot learning (ZSL), meanwhile, deals with categories for which no examples are provided \cite{billion2024low}. Suvarna et al. (2019) discusses the challenges and techniques of generalization in few-shot learning, emphasizing that while machines need numerous examples to learn like humans, they lack certain cognitive functions. In contrast to earlier methods requiring human intervention for learning representations, modern deep learning autonomously learns these representations. However, learning effective representations from few examples remains difficult. Deep models require diverse, \textit{representative examples} to generalize well but often struggle in few-shot scenarios due to the scarcity of such examples \cite{kadam2020review}.
-To tackle the challenges of few-shot learning, we developed a strategy that utilizes both relevant and random examples. The selection of relevant examples is based on cosine similarity measurements between the embeddings of training samples and a predefined set of few-shot examples. These embeddings are generated using the SentenceTransformer model, specifically "all-MiniLM-L6-v2," which provides a dense representation of text ideal for similarity assessments. The selection process is detailed in Algorithm~\ref{alg:precomputeExamples}, where \textsc{top\_k} indicates the number of relevant samples calculated. In our experiments, \textsc{top\_k} is set to 2 due to memory constraints and the context length limitations of the Llama-2-7b-hf and Llama-3-8b models, which are 4096 and 8192 tokens, respectively. The parameters \textit{context\_weight} and \textit{question\_weight} are both set to 0.5, reflecting the equal importance of context and questions in datasets such as ConvFinQA, where the history and the final question are crucial. This approach ensures that no input is truncated during training, although it limits our ability to test performance with a larger number of examples, i.e., a much higher \textsc{top\_k}.
+In Section 5.3.3, we detail the outcomes of the experiment involving few-shot prompting techniques, where we evaluated various few-shot learning methods. Few-shot learning (FSL) involves training models to recognize categories from very limited examples. One-shot learning (OSL) refers to learning tasks where only a single example per rare category is available. Zero-shot learning (ZSL), meanwhile, deals with categories for which no examples are provided \cite{billion2024low}. Suvarna et al. (2019) discusses the challenges and techniques of generalization in few-shot learning, emphasizing that while machines need numerous examples to learn like humans, they lack certain cognitive functions. In contrast to earlier methods requiring human intervention for learning representations, modern deep learning autonomously learns these representations. However, learning effective representations from few examples remains difficult. Deep models require diverse, \textit{representative examples} to generalize well but often struggle in few-shot scenarios due to the scarcity of such examples \cite{kadam2020review}.
+To tackle the challenges of few-shot learning, we developed a strategy that utilizes both relevant and random examples. The selection of relevant examples is based on cosine similarity \footnote{https://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.cosine\_similarity.html} measurements between the embeddings of training samples and a predefined set of few-shot examples. These embeddings are generated using the SentenceTransformer model, specifically \textit{all-MiniLM-L6-v2} \footnote{https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2} which provides a dense representation of text ideal for similarity assessments. The selection process is detailed in Algorithm~\ref{alg:precomputeExamples}, where \textsc{top\_k} indicates the number of relevant samples calculated. In our experiments, \textsc{top\_k} is set to 2 due to memory constraints and the context length limitations of the Llama-2-7b-hf and Llama-3-8b models, which are 4096 and 8192 tokens, respectively. The parameters \textit{context\_weight} and \textit{question\_weight} are both set to 0.5, reflecting the equal importance of context and questions in datasets such as ConvFinQA, where the history and the final question are crucial. This approach ensures that no input is truncated during training, although it limits our ability to test performance with a larger number of examples, i.e., a much higher \textsc{top\_k}.
 
-In Experiment -X, we used few-shot learning techniques, leveraging an improved prompt template that included context, a question, and Python code examples, with a focus on proper formatting using actual newline characters.
+In the experiment for code generation detailed in section 5.4.1, we used few-shot learning techniques, leveraging an improved prompt template that included context, a question, and Python code examples, with a focus on proper formatting using actual newline characters.
 To select the most relevant examples for the model, we employed TF-IDF vectorization and cosine similarity measures. This approach ensured that the examples used in the prompt were highly pertinent to the task at hand, enhancing the model's ability to generate accurate and executable code.
 
 
@@ -488,9 +507,9 @@ During inference, the model generates responses based on varying prompt template
 \subsection{Permissive Accuracy}
 We have designed a permissive accuracy measure that accommodates minor precision differences by allowing slight deviations in decimal points within an alpha threshold. This measure is particularly useful in financial contexts, where exact numerical precision may not always be critical. The method involves extracting numerical values and comparing them within a tunable alpha difference.
 
-For threshold setting, we define acceptable deviation ranges, ensuring flexibility in various applications. This measure is especially relevant in scenarios like relational extraction, where generated outputs are textual values. In such cases, the SequenceMatcher is used for string comparison, returning 1 if the similarity exceeds 0.9 or if key parts of the prediction and reference match. This approach is beneficial when the model generates the correct answer but includes additional values, which can be ignored. Additionally, we have an exact match function to report precise match accuracy, ensuring comprehensive evaluation of model performance.
+For threshold setting, we define acceptable deviation ranges, ensuring flexibility in various applications. This measure is especially relevant in scenarios like relational extraction, where generated outputs are textual values. In such cases, the SequenceMatcher is used for string comparison, returning 1 if the similarity exceeds $\beta$ \footnote{$\beta$ = 0.9 \& \alpha = 0.001}  or if key parts of the prediction and reference match. This approach is beneficial when the model generates the correct answer but includes additional values, which can be ignored. Additionally, we have an exact match function to report precise match accuracy, ensuring comprehensive evaluation of model performance.
 \begin{algorithm}
-\caption{Calculate Accuracy with Some Leniency}
+\caption{Permissive Accuracy}
 \label{alg:calculate_accuracy_permissive}
 \begin{algorithmic}[1]
 \Function{Permissive\_Accuracy}{predicted, actual}
@@ -502,7 +521,7 @@ For threshold setting, we define acceptable deviation ranges, ensuring flexibili
     \State actual\_num $\gets$ \texttt{ExtractNumericalValue(actual)}
     
     \If {pred\_num is not None and actual\_num is not None}
-        \State \textbf{Return} \texttt{int(abs(pred\_num - actual\_num) < 0.001)}
+        \State \textbf{Return} \texttt{int(abs(pred\_num - actual\_num) < \alpha)}
     \Else
         \State pred\_words $\gets$ \texttt{predicted.split()}
         \State actual\_words $\gets$ \texttt{actual.split()}
@@ -528,44 +547,445 @@ In the context of financial datasets, exact match accuracy is vital for ensuring
     \item BERT Precision, Recall, F1 Score: Uses contextual embeddings to measure semantic similarity.
     \item GLUE Benchmark: It is a collection of resources for training, evaluating, and analyzing natural language understanding systems across diverse tasks.
 \end{itemize}
-\section{Few-Shot Code Generation \& External Tool Integration}
-\subsection{Subset Selection and Preparation}
-First, a small subset of the dataset was curated specifically for the LangChain integration. This subset was chosen to represent a variety of financial question-answer scenarios that required detailed computational analysis. Each entry in this subset included Python scripts in the answer fields, which were necessary for executing complex calculations. The selection criteria ensured that the subset contained diverse and representative examples that could test the model’s ability to handle different types of financial queries.
+\section{External Tool Integration \& Few-Shot Code Generation}
+%talk about the idea of using python code generated from the financial dataset input and context and using langchain's agent tool use to generate the financial answer. begin with implementing idea on a small handcrafted sample dataset to check if the idea will be feasible on the large financial datasets for improving numerical precision. Then the actual experiment - dataset i.e. TAT-QA, generated python script and using exec function of python to generate final answer. 
 
-\subsection{Python REPL Pipeline Integration}
-To execute the Python scripts included in the answer fields, the subset was run through a Python REPL (Read-Eval-Print Loop) pipeline. The Python REPL pipeline allows for real-time execution of Python code, which is crucial for dynamic and accurate computation of financial data. The model utilized for this integration was the Facebook 1.5b model, known for its robust language processing capabilities.
+[\textcolor{blue}{\textit{\textbf{Ask potential research question and try to answer those questions in this section as well as in the experiments - Results and Discussion section | Also add diagram of this code generation approach in a well defined manner like the one on langgraph for code gen page | In Experiments talk about use of atmax 5 rel examples but couldn't due to model limit context length and on truncation losing useful context for specific dataset i.e. convfinqa - add sample in appendix from each dataset}}}]
 
-\subsection{Integration Process}
+Recent advancements in tackling complex reasoning tasks, have opened new avenues for applying large language models to specialized domains like financial analysis. Notably, the study by Suzgun et al.(2022) provides compelling evidence for the efficacy of step-by-step approaches in solving intricate problems. The study focused on BIG-Bench, a collaborative benchmark comprising over 200 diverse text-based tasks, including traditional NLP, mathematics, commonsense reasoning, and question-answering \cite{suzgun2022challenging}. Particularly relevant to our research is their curation of BIG-Bench Hard (BBH), a subset of 23 especially challenging tasks where previous models had not surpassed average human-rater performance.
 
-The integration process involved several technical steps:
+The study's results are particularly illuminating: using various \textit{chain-of-thought} (CoT) approaches, they found that the Codex model with CoT prompting outperformed the average human rater score on 17 out of 23 chosen tasks. This remarkable performance on diverse, complex tasks underscores the potential of step-by-step reasoning approaches in tackling challenging problems. Drawing parallels to our research, we recognized that the complex nature of financial data analysis - involving intricate calculations, temporal considerations, and the integration of tabular and textual data - could benefit from a similar methodical approach.
 
-\begin{itemize}
-    \item Embedding Python Scripts: The Python scripts were embedded directly into the model prompts. This required careful formatting to ensure the scripts were correctly interpreted and executed by the REPL pipeline.
-    \item Model Adaptation: The Facebook 1.5b model was adapted to recognize and handle the embedded Python scripts. This adaptation involved training the model to parse the script correctly and execute it within the context of the financial question-answering task.
-    \item Output Handling: The outputs generated by the Python scripts were then reintegrated into the model’s response. This involved capturing the output from the REPL pipeline, formatting it appropriately, and ensuring it was included in the final answer provided by the model.
-\end{itemize}
+Inspired by these findings, our research leverages a step-by-step code generation methodology to address the unique challenges posed by financial datasets. By breaking down complex financial analyses into discrete, programmable steps, we aim to enhance the accuracy and reliability of our model's outputs. This approach allows us to handle the multifaceted nature of financial data, including numerical precision in calculations, temporal dependencies in time-series data, and the integration of qualitative information from textual sources.
 
-\subsection{Execution and Validation}
-During the inference phase, the integrated system worked as follows:
+Our methodology extends the concept of chain-of-thought reasoning to the domain of financial analysis, where each step in the chain is represented by a generated code snippet. This not only facilitates more accurate computations but also provides transparency and interpretability in the analysis process - crucial factors in the financial sector where decisions often require clear justification and auditable processes.
 
-\begin{itemize}
-    \item Query Processing: When a financial query was posed, the model parsed the question and identified the need for computational analysis.
-    \item Script Execution: The relevant Python script was executed using the Python REPL pipeline. This real-time execution allowed the model to handle complex calculations dynamically.
-    \item Result Integration: The results from the script execution were captured and formatted to be part of the model’s response. This integration ensured that the answer provided was accurate and directly addressed the computational aspects of the query.
-\end{itemize}
+Our experimental design commenced with the careful selection of a small, handcrafted sample derived from a diverse array of financial question-answer pairs. These samples were meticulously chosen from the comprehensive dataset detailed in Section 4.1.1, ensuring a representative cross-section of financial queries and their corresponding responses.
+
+To enhance the analytical capabilities of our model, we implemented a novel approach: replacing the original answers in the dataset with Python scripts. These scripts were generated with the assistance of GPT-4, a state-of-the-art language model, and subsequently underwent rigorous manual verification to ensure accuracy and functionality. This transformation allowed for a more dynamic and computationally rich representation of financial data analysis. The sample dataset was intentionally constructed to encompass a wide spectrum of answer types, including Numerical responses, Textual answers and Temporal data. This diversity in response types was crucial for assessing the model's versatility in handling various financial data representations. For the execution of these Python scripts embedded within the answer fields, we leveraged the LangChain LLM framework integrated into our pipeline. The execution environment was facilitated by a Python agent interfacing with a Python REPL (Read-Eval-Print Loop) tool. The REPL tool was instrumental in enabling real-time execution and evaluation of Python code, a feature paramount for the dynamic and precise computation of financial metrics and analyses. The language model underpinning this integration was the \textsc{facebook/opt-1.3b model}, selected for its robust natural language processing capabilities and its ability to understand and generate context-aware responses. 
+%Decoding strategies for code generation include deterministic methods like greedy search and beam search, and sampling techniques such as temperature sampling, top-k sampling, and top-p (nucleus) sampling \cite{jiang2024survey}. 
+As demonstrated by \cite{holtzman2019curious}, Nucleus Sampling is highly effective for neural generation. By sampling from the dynamic nucleus of the probability distribution, it balances diversity and reliability, resulting in text that mirrors human quality while maintaining fluency and coherence. In our pipeline, we use parameters: temperature=0.7, top\_p=0.95, and repetition\_penalty=1.15. Using these parameters means controlling the randomness of the generation (temperature=0.7), focusing on the top 95\% of the probability mass (top\_p=0.95), and discouraging repetitive sequences (repetition\_penalty=1.15). The results are presented and analyzed in Chapter 5.
+
+In light of the promising results obtained from the initial experiment, we proceeded to evaluate the latest \textsc{meta-llama/Meta-Llama-3.1-8B-Instruct} model, a cutting-edge language model. This model demonstrated superior performance in code generation on the HumanEval benchmark, surpassing the GPT-3.5 Turbo model, and also achieved comparable results on reasoning tasks using the ARC Challenge benchmark \footnote{https://ai.meta.com/blog/meta-llama-3-1/}, thereby establishing its suitability for our study.
+
+The process begins with a dynamic few-shot prompting mechanism designed to optimize the model's responses to specific financial queries. To ensure contextual alignment, we utilize TF-IDF vectorization and cosine similarity to identify and select the most relevant examples from our dataset for each query. These selected examples are then integrated into an enhanced few-shot prompt template contained in~\ref{sec:Prompt template-code-gen}, along with the corresponding context and question, to guide the model in generating accurate Python code.
+
+The code generation process is fine-tuned with parameters such as temperature (0.9) and top\_p (0.95) to strike a balance between creativity and coherence. The generated code is subsequently extracted using regex pattern matching and executed within a controlled environment. This environment is equipped with the necessary libraries and contextual data, facilitating comprehensive financial data manipulation and analysis.
+
+To evaluate the effectiveness of our approach, we processed a randomly selected subset of 1,000 samples from the TAT-QA dataset, ensuring the representativeness of the sample. For each sample, Python code was generated, executed, and the output was compared against a reference answer. The evaluation utilized the same suite of metrics detailed in Section 4.4.3, ensuring a rigorous assessment of the code generation approach within the context of financial tasks. The flowchart is explained in Figure~\ref{fig:methodology-flow}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1.0\linewidth]{mscdiss-skeleton/updated-financial-analysis-flowchart.jpg}
+    \caption{LLaMA-3.1-8B Workflow: From Query to Code Execution}
+    \label{fig:enter-label}
+\end{figure}
+%This methodology represents a novel approach to financial data analysis, combining the power of advanced language models with domain-specific knowledge and real-time code execution. By dynamically generating and executing code based on natural language queries, our system demonstrates the potential for more flexible and accurate financial analysis tools.
+
+\begin{figure}[!ht]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    node distance = 0.8cm and 1.2cm,
+    auto,
+    thick,
+    block/.style = {rectangle, draw, fill=white, text width=2cm, text centered, 
+                    minimum height=0.8cm, font=\footnotesize, rounded corners},
+    cloud/.style = {ellipse, draw, fill=white, text width=2cm, text centered, 
+                    minimum height=0.8cm, font=\footnotesize},
+    database/.style = {cylinder, draw, shape border rotate=90, aspect=0.25, fill=white, 
+                       text width=2cm, text centered, minimum height=1.2cm, font=\footnotesize},
+    line/.style = {draw, -{Stealth[scale=0.8]}, thick},
+    dashed-line/.style = {draw, -{Stealth[scale=0.8]}, dashed, thick},
+    group label/.style = {font=\tiny\bfseries, fill=white, draw, rounded corners, text centered, 
+                          fill=gray!20, inner sep=1pt},
+    group/.style = {rectangle, draw, rounded corners, fill=gray!10, inner sep=0.2cm}
+]
+% Input Processing
+\node [cloud] (input) {Input Query};
+\node [block, below=of input] (selection) {Example Selection};
+\node [database, left=of selection, xshift=-0.8cm] (dataset) {TAT-QA Dataset};
+% Code Generation
+\node [block, below=of selection] (prompt) {Prompt Construction};
+\node [block, below=of prompt] (generation) {Code Generation};
+\node [cloud, left=of generation, xshift=-0.8cm] (model) {meta-llama/\\Meta-Llama-3.1-\\8B-Instruct};
+\node [block, below=of generation] (extraction) {Code Extraction};
+% Code Execution
+\node [block, below=of extraction] (execution) {Code Execution};
+\node [database, left=of execution, xshift=-0.8cm] (environment) {Execution Environment};
+\node [block, below=of execution] (output) {Output Generation};
+% Evaluation
+\node [block, below=of output] (evaluation) {Evaluation of Results};
+\node [database, left=of evaluation, xshift=-0.8cm] (metrics) {Metrics Suite};
+% Connections
+\path [line] (input) -- (selection);
+\path [dashed-line] (dataset) -- (selection);
+\path [line] (selection) -- (prompt);
+\path [line] (prompt) -- (generation);
+\path [dashed-line] (model) -- (generation);
+\path [line] (generation) -- (extraction);
+\path [line] (extraction) -- (execution);
+\path [dashed-line] (environment) -- (execution);
+\path [line] (execution) -- (output);
+\path [line] (output) -- (evaluation);
+\path [dashed-line] (metrics) -- (evaluation);
+% Group boxes
+\begin{pgfonlayer}{background}
+    \node [group, fit=(input) (selection) (dataset)] (input-group) {};
+    \node [group, fit=(prompt) (generation) (extraction) (model)] (generation-group) {};
+    \node [group, fit=(execution) (output) (environment)] (execution-group) {};
+    \node [group, fit=(evaluation) (metrics)] (evaluation-group) {};
+\end{pgfonlayer}
+% Group labels
+\node [group label, above=0.05cm of input-group.north west, anchor=west] {Input Processing};
+\node [group label, above=0.05cm of generation-group.north west, anchor=west] {Code Generation};
+\node [group label, above=0.05cm of execution-group.north west, anchor=west] {Code Execution};
+\node [group label, above=0.05cm of evaluation-group.north west, anchor=west] {Evaluation};
+\end{tikzpicture}
+}
+\caption{Flowchart of the Code Generation Process for Financial Analysis}
+\label{fig:methodology-flow}
+\end{figure}
+
+%In the initial setup we choose a small handcrafted sampled from a variety of financial question-answer samples chosen from the dataset explained in section 4.1.1 . We then replaced the actual answers in the dataset with python scripts generated using the help of GPT-4 and verified manually. The sample of dataset were diverse and contains different representations like numerical answers or textual answer or date etc. To execute the Python scripts included in the answer fields, we utilised the LangChain LLM from the pipeline and then used the Python agent to run through a Python REPL (Read-Eval-Print Loop) tool. The Python REPL tool allows for real-time execution of Python code, which was crucial for dynamic and accurate computation of financial data. The model utilized for this integration was the Facebook 1.5b model, known for its robust language processing capabilities.
+
+%\subsection{Subset Selection and Preparation}
+%First, a small subset of the dataset was curated specifically for the LangChain integration. This subset was chosen to represent a variety of financial question-answer scenarios that required detailed computational analysis. Each entry in this subset included Python scripts in the answer fields, which were necessary for executing complex calculations. The selection criteria ensured that the subset contained diverse and representative examples that could test the model’s ability to handle different types of financial queries.
+
+%\subsection{Python REPL Pipeline Integration}
+%To execute the Python scripts included in the answer fields, the subset was run through a Python REPL (Read-Eval-Print Loop) pipeline. The Python REPL pipeline allows for real-time execution of Python code, which is crucial for dynamic and accurate computation of financial data. The model utilized for this integration was the Facebook 1.5b model, known for its robust language processing capabilities.
+
+%\subsection{Integration Process}
+
+%The integration process involved several technical steps:
+
+%\begin{itemize}
+    %\item Embedding Python Scripts: The Python scripts were embedded directly into the model prompts. This required careful formatting to ensure the scripts were correctly interpreted and executed by the REPL pipeline.
+    %\item Model Adaptation: The Facebook 1.5b model was adapted to recognize and handle the embedded Python scripts. This adaptation involved training the model to parse the script correctly and execute it within the context of the financial question-answering task.
+    %\item Output Handling: The outputs generated by the Python scripts were then reintegrated into the model’s response. This involved capturing the output from the REPL pipeline, formatting it appropriately, and ensuring it was included in the final answer provided by the model.
+%\end{itemize}
+
+%\subsection{Execution and Validation}
+%During the inference phase, the integrated system worked as follows:
+
+%\begin{itemize}
+   % \item Query Processing: When a financial query was posed, the model parsed the question and identified the need for computational analysis.
+    %\item Script Execution: The relevant Python script was executed using the Python REPL pipeline. This real-time execution allowed the model to handle complex calculations dynamically.
+    %\item Result Integration: The results from the script execution were captured and formatted to be part of the model’s response. This integration ensured that the answer provided was accurate and directly addressed the computational aspects of the query.
+%\end{itemize}
 % \section{Other approaches used}
 
 \chapter{Experiments}
 
-\section{Comparative Analysis}
+This chapter outlines the setup, methods, and findings of our study, which aims to improve how language models handle numbers in financial settings. We've explored several strategies, including instruction tuning, few-shot prompting, and fine-tuning, to outperform current models on a variety of financial tasks. We've also introduced an innovative approach: generating code from input and executing it through a Python exec function in a structured pipeline to boost the model’s ability to process numerical data. Detailed discussions about these techniques are provided in Section 5.4.
 
-\section{Fine-tuning Strategy Optimization}
+\section{Research Questions}
+Our experiments were designed to address the following research questions:
+\begin{itemize}
+\item How do different model architectures (Llama2-7B vs. Llama3-8B) compare in their baseline performance on financial tasks?
+\item What is the impact of fine-tuning on the models' performance across various metrics?
+\item How effective are different few-shot prompting strategies (e.g., selective, random, chain-of-thought) compared to fine-tuning?
+\item What is the optimal number and type of examples for few-shot prompting in financial tasks?
+\item How does the performance of language models compare to specialized tool-based approaches in financial data processing?
+\end{itemize}
 
-\section{Cross-task Generalization}
+\section{Experimental Setup}
 
-\section{Results and Discussion}
+\subsection{Dataset}
+We utilized a composite dataset combining four financial datasets which are explained in section 4.1 in detail. This diverse dataset allows us to evaluate model performance across various financial data types and tasks.
+
+\subsection{Models}
+
+We experimented with the following models:
+\begin{itemize}
+\item Llama2-7B chat (baseline and fine-tuned)
+\item Llama3-8B (baseline and fine-tuned)
+\item Llama3.1-8b (baseline) 
+\item Llama3.1-8b-instruct (baseline)
+\end{itemize}
+
+\subsubsection{Approaches}
+
+We implemented and compared several approaches:
+
+\begin{enumerate}
+  \item Baseline performance (zero-shot)
+  \item Fine-tuning
+  \item Few-shot prompting with chain-of-thought (FSP + COT)
+  \item Selective few-shot prompting
+  \item Random few-shot prompting
+  \item Tool-based approach using Langchain (on a subset of 150 samples)
+   \item Code generation and execution (on TAT-QA dataset)
+\end{enumerate}
+
+\subsection{Evaluation Metrics}
+We employed a comprehensive set of metrics to evaluate model performance which are all detailed in section 4.4.3:
+\begin{itemize}
+\item Average Permissive Accuracy (custom metric allowing for slight numerical differences and partial text matches)
+\item Average Exact Accuracy
+\item ROUGE Score
+\item BLEU Score
+\item METEOR Score
+\item BERTScore (Precision, Recall, F1)
+\item GLEU Score
+\end{itemize}
+\begin{figure}[h!] 
+    \centering 
+    \includegraphics[width=0.75\textwidth]{mscdiss-skeleton/Screenshot 2024-08-04 at 19.20.50.png} 
+    \caption{Performance Metrics of various models} 
+    \label{fig:my_label} 
+\end{figure}
+
+\section{Results and Analysis}
+\subsection{Model Architecture Comparison}
+Table 5.1 presents the evaluation metrics for various models and approaches.
+
+\begin{table}[h!]
+\centering
+\caption{Evaluation Metrics for Various Models}
+\label{table:metrics}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lccccccccc@{}}
+\toprule
+Model & Avg Permissive Acc. & Avg Exact Acc. & ROUGE Score & BLEU Score & METEOR Score & BERTScore P & BERTScore R & BERTScore F1 & GLEU Score \\ 
+\midrule
+%Llama2-7B chat baseline & 0.2720 & 0.0225 & 0.16 & 0.01 & 0.19 & 0.814 & 0.860 & 0.836 & 0.02 \\
+Llama2-7B chat baseline & 0.27 & 0.02 & 0.16 & 0.01 & 0.19 & 0.814 & 0.860 & 0.836 & 0.02 \\
+Llama3-8B baseline & 0.33 & 0.05 & 0.20 & 0.03 & 0.19 & 0.836 & 0.876 & 0.855 & 0.04 \\
+Llama2-7B chat Fine tuned & 0.46 & 0.00 & 0.15 & 0.05 & 0.21 & 0.778 & 0.892 & 0.830 & 0.07 \\
+Llama3-8B Fine tuned & 0.67 & 0.15 & 0.36 & 0.06 & 0.31 & 0.850 & 0.919 & 0.881 & 0.07 \\
+Llama3-8B FSP + COT & 0.59 & 0.15 & 0.36 & 0.07 & 0.31 & 0.854 & 0.917 & 0.883 & 0.07 \\
+Llama3-8B Selective FSP & 0.64 & 0.11 & 0.27 & 0.06 & 0.28 & 0.809 & 0.913 & 0.855 & 0.05 \\
+Llama3-8B Random FSP & 0.64 & 0.11 & 0.27 & 0.06 & 0.28 & 0.807 & 0.912 & 0.854 & 0.05 \\
+%LLAMA3-8B {Zero shot, one shot, five shot.. } & Separate table & - & - & - & - & - & - & - & - \\
+%Tool use Langchain [150 samples] & - & 0.75 & 0.30 & 0.23 & 0.33 & 0.822 & 0.878 & 0.849 & 0.23 \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+\textbf{Key observations:}
+\begin{itemize}
+ \item Llama3-8B baseline outperforms Llama2-7B chat baseline across all metrics, indicating that the newer architecture has inherently better number handling capabilities.
+ \item The performance gap is particularly noticeable in Average Permissive Accuracy (0.33 vs. 0.27) and Average Exact Accuracy (0.05 vs. 0.02).
+\end{itemize}
+\subsection{Impact of Fine-tuning}
+\textbf{Fine-tuning significantly improved the performance of both model architectures:}
+\begin{itemize}
+
+\item Llama2-7B chat: Average Permissive Accuracy increased from 0.27 to 0.46
+\item Llama3-8B: Average Permissive Accuracy increased from 0.33 to 0.67
+
+The fine-tuned Llama3-8B model showed the best overall performance, with notable improvements in ROUGE Score (0.36) and METEOR Score (0.31).
+\end{itemize}
+
+\subsection{Few-shot Prompting Strategies}
+Different few-shot prompting strategies yielded varying results:
+\begin{itemize}
+
+\item FSP + COT: Achieved high performance (0.59 Average Permissive Accuracy) but did not surpass fine-tuned models.
+\item Selective FSP and Random FSP: Both achieved 0.64 Average Permissive Accuracy, indicating that careful example selection may not always be necessary.
+\end{itemize}
+
+\subsection{Optimal Few-shot Prompting}
+Table 5.2 shows the performance metrics for different few-shot prompting approaches.
+%Change this table based on new experiments on random, selective and zero examples
+\begin{table}[h!]
+\centering
+\caption{Performance Metrics for Different Few Shot Prompting}
+\label{tab:performance_metrics}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lccccccccc@{}}
+\toprule
+Fine Tuning Type & Avg Permissive Acc. & Avg Exact Acc. & ROUGE Score & BLEU Score & METEOR Score & BERTScore P & BERTScore R & BERTScore F1 & GLEU Score \\ 
+\midrule
+1 Relevant Example & 0.62 & 0.12 & 0.32 & 0.06 & 0.28 & 0.841 & 0.914 & 0.874 & 0.06 \\
+1 Random Example & 0.63 & 0.13 & 0.33 & 0.06 & 0.29 & 0.840 & 0.915 & 0.874 & 0.06 \\
+Results 1 & 0.61 & 0.14 & 0.34 & 0.06 & 0.28 & 0.852 & 0.916 & 0.881 & 0.07 \\
+Results 2 & 0.61 & 0.14 & 0.34 & 0.06 & 0.28 & 0.853 & 0.915 & 0.881 & 0.07 \\
+Results 3 & 0.61 & 0.14 & 0.35 & 0.06 & 0.28 & 0.855 & 0.916 & 0.883 & 0.07 \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\textbf{Key findings:}
+\begin{itemize}
+ \item Using a single relevant example or a single random example yielded similar performance (0.62 vs. 0.63 Average Permissive Accuracy).
+ \item The results suggest that the number of examples may be more important than their specific relevance in this context.
+\end{itemize}
+
+\subsection{Example Type Distributions}
+Table 5.3 presents the distribution and weights of different example types used in the experiments.
+
+The varied distributions across different result sets allow us to analyze the impact of example selection strategies on model performance.
+\begin{table}[h!]
+\centering
+\caption{Example Type Distributions and Weights}
+\label{tab:example_weights}
+\begin{tabular}{>{\raggedright}p{2.5cm}cccc}
+\toprule
+\textbf{Results} & \textbf{Combined} & \textbf{Relevant } & \textbf{Randomized} & \textbf{Baseline} \\
+\midrule
+Results 1 & 341 (0.25) & 304 (0.25) & 325 (0.25) & 317 (0.25) \\
+Results 2 & 147 (0.10) & 324 (0.25) & 499 (0.40) & 317 (0.25) \\
+Results 3 & 338 (0.25) & 616 (0.50) & 197 (0.15) & 136 (0.10) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Tool-based Approach}
+
+The tool-based approach using Langchain on a subset of 150 samples showed promising results:
+\begin{itemize}
+   \item Exact Accuracy: 0.75
+   \item BLEU Score: 0.23
+   \item METEOR Score: 0.33
+\end{itemize}
+The findings from this study underscore the efficacy of specialized tools in performing precise financial tasks, with a notable requirement for exact matches in data handling. It is pertinent to acknowledge that these results are derived from scenarios utilizing manually generated code, specifically using GPT-4 \footnote{https://chatgpt.com}, which represents a potentially idealized set of conditions.
+
+An interesting continuation of this research could involve leveraging OpenAI's advanced code generation capabilities in conjunction with Langchain's Python agent REPL tool to automate and refine this process further. However, such an approach would entail additional costs, which were not within the purview of this current study. Nevertheless, the potential of commercial language models to adeptly manage the complexity and variability inherent in our financial dataset remains a compelling aspect of our ongoing investigation. This line of inquiry suggests substantial promise for enhancing automated financial analysis tools through the integration of sophisticated AI-driven technologies.
+
+\section{Code Generation Approach}
+In this series of experiments, we explore a novel approach to enhancing numerical precision in language models for financial tasks. Rather than relying on traditional fine-tuning methods, we leverage the models' inherent code generation capabilities through strategic few-shot prompting. This approach is particularly relevant in the context of financial data processing, where precise numerical handling is crucial.
+Our motivation stems from the observation that while large language models have demonstrated impressive natural language understanding and generation capabilities, their performance in tasks requiring precise numerical computations often falls short. By guiding these models to generate executable code, we aim to bridge this gap and achieve higher accuracy in financial calculations.
+
+\subsection{Experimental Setup}
+
+\textbf{Dataset:} We utilized the TAT-QA dataset \cite{zhu-etal-2021-tat}, a benchmark for text-and-table question answering. To ensure a manageable yet representative sample, we randomly selected \textit{1000} samples from the dataset. This selection was kept constant across all models using a fixed seed value for reproducibility.
+
+\textbf{Models:} We experimented with several models from the Llama family:
+\begin{enumerate}
+    \item Llama3-8b
+    \item Llama3.1-8b
+    \item Llama3.1-8b-instruct
+\end{enumerate}
+
+Additionally, we included results from a \textsc{facebook/opt-1.3b} model using Langchain for comparison, though this was tested on a smaller sample of 150 instances.
+
+Our approach can be summarized in the following steps:
+\begin{enumerate}
+   \item Few-shot prompting: We provided the models with example samples that demonstrate the desired code structure.
+   \item Code generation: The models were then prompted to generate similar code for new inputs.
+   \item Code execution: We used Python's exec() function to execute the generated code and produce final results.
+   \item Evaluation: The results were evaluated using various metrics, including permissive accuracy, exact accuracy, ROUGE, BLEU, METEOR, BERTScore, and GLEU.
+\end{enumerate}
+\begin{figure}[h!] 
+    \centering 
+    \includegraphics[width=0.75\textwidth]{mscdiss-skeleton/Screenshot 2024-08-04 at 21.03.15.png} 
+    \caption{Performance Metrics of various models in Code Generation} 
+    \label{fig:my_label} 
+\end{figure}
+It's worth noting that the Llama models used in this study, particularly the 8b variants, are not primarily known for their code generation capabilities. This choice was deliberate, as it allows us to test the limits of our approach and potentially demonstrate its efficacy even with models not specialized for this task.
+
+\subsection{Results and Analysis}
+Table 5.4 presents the evaluation metrics for various models and approaches.
+\begin{table}[h!]
+\centering
+\caption{Evaluation Metrics for Code Generation}
+\label{table:metrics}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lccccccccc@{}}
+\toprule
+Model & Avg Permissive Acc. & Avg Exact Acc. & ROUGE Score & BLEU Score & METEOR Score & BERTScore P & BERTScore R & BERTScore F1 & GLEU Score \\ 
+\midrule
+facebook/opt-1.3b (langchain - Test samples 150) & - & 0.75 & 0.30 & 0.23 & 0.33 & 0.822 & 0.878 & 0.849 & 0.23 \\
+
+Llama3-8b & 0.39 & 0.30 & 0.40 & 0.18 & 0.32 & 0.870 & 0.898 & 0.884 & 0.19 \\
+
+Llama3.1-8b & 0.40 & 0.30 & 0.39 & 0.17 & 0.32 & 0.868 & 0.898 & 0.882 & 0.18 \\
+
+Llama3.1-8b-instruct & 0.52 & 0.43 & 0.49 & 0.29 & 0.34 & 0.887 & 0.909 & 0.897 & 0.24 \\ 
+
+Llama3.1-8b (\textbf{code-gen}) & 0.23 & 0.18 & 0.25 & 0.05 & 0.14 & 0.841 & 0.874 & 0.856 & 0.06 \\ 
+
+Llama3.1-8b-instruct (\textbf{code-gen}) & 0.35 & 0.28 & 0.41 & 0.14 & 0.21 & 0.866 & 0.898 & 0.881 & 0.14 \\ 
+
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+
+\textbf{Key observations:}
+\begin{enumerate}
+
+    \item Performance improvement with instruction tuning: The Llama3.1-8b-instruct model consistently outperformed its non-instructed counterpart across all metrics. For instance, in the code generation task, the instruct model achieved a 52\% higher average permissive accuracy (0.35 vs 0.23) and a 55\% higher average exact accuracy (0.28 vs 0.18) compared to the non-instruct model.
+    \item Code generation vs. direct output: Interestingly, for both Llama3.1-8b and Llama3.1-8b-instruct, the direct output outperformed the code generation approach. This suggests that while code generation shows promise, there's still room for improvement in the quality and reliability of the generated code.
+    \item Comparison with Langchain: The facebook/opt-1.3b model using Langchain showed impressive performance on its test set, achieving 0.75 exact accuracy. However, it's important to note that this was on a much smaller sample size (150) compared to our main experiments (1000).
+
+\end{enumerate}
+
+To further understand the challenges in the code generation approach, we analyzed the filtered sampling results, presented in Table 5.5.
+
+
+\begin{table}[h!]
+\centering
+\caption{Filtered sampling in Code Generation}
+\label{table:metrics}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lccccccccc@{}}
+\toprule
+Model &  Total samples selected & Remaining samples & Percentage of samples with execution errors & Utilization Rate \\ 
+\midrule
+
+%Llama3.1-8b-instruct &  \\ 
+
+Llama3.1-8b (\textbf{code-gen}) &  1000 & 779 & 31.58 & 53.3\\ 
+
+Llama3.1-8b-instruct (\textbf{code-gen}) & 1000 &  843 & 7.12 & 78.3\\ 
+
+
+\bottomrule
+\end{tabular}
+}
+\end{table}
+\textbf{These results reveal crucial insights:}
+\begin{enumerate}
+   
+ \item Sample filtration: A significant number of samples were filtered out due to various issues, primarily code generation failures or execution errors.
+ \item Improvement with instruction tuning: The Llama3.1-8b-instruct model showed a marked improvement in code generation reliability. It had fewer samples filtered out (157 vs 221) and a drastically lower percentage of execution errors (7.12\% vs 31.58\%) compared to the non-instruct model.
+ \item Utilization rate: The instruct model achieved a much higher utilization rate (78.3\% vs 53.3\%), indicating that it successfully generated and executed code for a larger proportion of the input samples.
+\end{enumerate}
+
+\section{Discussion}
+
+Our experiments reveal several important insights into improving number handling capabilities in language models for financial tasks:
+\begin{enumerate}
+   
+ \item \textbf{Model Architecture:} The Llama3-8B architecture demonstrates superior baseline performance compared to Llama2-7B, indicating that newer model iterations have improved inherent number handling abilities.
+ \item \textbf{Fine-tuning Effectiveness:} Fine-tuning proves to be a highly effective strategy, significantly boosting performance across all metrics. The fine-tuned Llama3-8B model achieved the best overall results, suggesting that combining advanced architectures with task-specific fine-tuning is a powerful approach.
+ \item \textbf{Few-shot Prompting:} While not outperforming fine-tuned models, few-shot prompting strategies show promise, especially when computational resources for full fine-tuning are limited. The similar performance of selective and random few-shot prompting indicates that the quantity of examples may be more crucial than their specific relevance in this domain.
+ \item \textbf{Example Selection:} Our results suggest that careful curation of examples for few-shot prompting may not always yield significantly better results than random selection. This finding could simplify the implementation of few-shot learning in practical applications.
+ \item \textbf{Tool-based Approaches:} The high performance of the Langchain-based tool on a subset of tasks highlights the potential of combining language models with specialized financial tools for certain applications.
+  \item \textbf{Potential of code generation approach:} Despite using models not primarily designed for code generation, we achieved promising results. This suggests that with more specialized models, the performance could be even better.
+  \item \textbf{Impact of instruction tuning:} The consistent outperformance of the instruct model demonstrates the value of instruction tuning in improving code generation capabilities and overall task performance.
+  \item \textbf{Challenges in code generation:} The high filtration rate and execution errors, especially in the non-instruct model, highlight the challenges in generating reliable, executable code for complex financial calculations.
+  \item \textbf{Trade-off between direct output and code generation:} While code generation offers the potential for more precise calculations, our results show that it currently underperforms compared to direct output. This suggests a need for further refinement of the code generation approach.
+  \item \textbf{Scalability and resource limitations:} Our experiments were limited to 8b models due to resource constraints. The significant improvement seen with the instruct model suggests that scaling to larger models (e.g., 70b or 405b) could yield even more impressive results, potentially establishing a new state-of-the-art for numerical precision in financial NLP tasks.
+\end{enumerate}
+% \section{Comparative Analysis}
+
+% \section{Fine-tuning Strategy Optimization}
+
+% \section{Cross-task Generalization}
+
+% \section{Results and Discussion}
 
 \chapter{Conclusions}
+
+%In conclusion, our research demonstrates that significant improvements in number handling capabilities for financial tasks can be achieved through a combination of advanced model architectures, fine-tuning, and strategic use of few-shot prompting. While fine-tuning provides the best overall performance, few-shot prompting offers a computationally lighter alternative with competitive results.
+
+%Future work should explore the integration of language models with specialized financial tools, as well as investigate the scalability of these approaches to larger and more diverse financial datasets. Additionally, further research into the optimal balance between example relevance and quantity in few-shot prompting could yield valuable insights for practical applications in the financial domain.
+
+%Our novel approach of leveraging code generation capabilities in language models shows promise for improving numerical precision in financial tasks. While challenges remain, particularly in the reliability of generated code, the significant improvements seen with instruction tuning and the potential for scaling to larger models suggest this could be a fruitful direction for future research.
+%Future work should focus on:
+
+%Experimenting with larger, more specialized models for code generation.
+%Refining the few-shot prompting technique to improve code generation reliability.
+%Developing more robust error handling and code execution pipelines.
+%Extending this approach to other domains requiring high numerical precision.
+
+%By addressing these areas, we believe this approach could potentially set a new standard for numerical accuracy in NLP tasks across various domains.
 
 \section{Limitations}
 
@@ -597,9 +1017,195 @@ During the inference phase, the integrated system worked as follows:
 
 \chapter{First appendix}
 
+\section{Prompt template}
+\label{sec:Prompt template-llama2-7b-chathf}
+\begin{tcolorbox}[
+    colback=blue!5!white, % Background color
+    colframe=white!75!black, % Border color
+    width=\textwidth, % Box width
+    boxrule=0.5mm, % Border thickness
+    sharp corners, % Sharp corners
+    title=PROMPT TEMPLATE FOR LLAMA2-7B-CHAT-HF,
+    fonttitle=\bfseries,
+    coltitle=black,
+    toptitle=3mm, % Space above title
+    bottomtitle=3mm % Space below title
+    ]
+
+\textbf{Prompt\_template:}
+
+\begin{lstlisting}[language={}, basicstyle=\ttfamily\small, frame=single, backgroundcolor=\color{gray!10}]
+<s>[INST]
+<<SYS>>
+{system_prompt}
+<</SYS>>
+{user_message} [/INST]
+\end{lstlisting}
+
+\textbf{system\_prompt:} "You are a helpful AI assistant specializing in financial analysis. Answer the following question based on the given context."
+
+\textbf{user\_message:}
+\begin{lstlisting}[language=Python, basicstyle=\ttfamily\small, frame=single, backgroundcolor=\color{gray!10}]
+f"Context:\n{context}\n\nQuestion: {question}"
+\end{lstlisting}
+\end{tcolorbox}
+
+
+\label{sec:Prompt template-llama3-8b}
+\begin{tcolorbox}[
+    colback=blue!5!white, % Background color
+    colframe=white!75!black, % Border color
+    width=\textwidth, % Box width
+    boxrule=0.5mm, % Border thickness
+    sharp corners, % Sharp corners
+    title=PROMPT TEMPLATE FOR LLAMA3-8B,
+    fonttitle=\bfseries,
+    coltitle=black,
+    toptitle=3mm, % Space above title
+    bottomtitle=3mm % Space below title
+    ]
+
+\textbf{Prompt template:}
+
+%\textbf{Alpaca Prompt:}
+
+\begin{lstlisting}[language={}, basicstyle=\ttfamily\small, frame=single, backgroundcolor=\color{gray!10}]
+Below is an instruction that describes a task, 
+paired with an input that provides further context. 
+Write a response that appropriately completes the request.
+
+### Instruction:
+{}
+
+### Input:
+{}
+
+### Response:
+{}
+\end{lstlisting}
+
+\end{tcolorbox}
+
+\label{sec:Prompt template-llama3-8b-fsp}
+\begin{tcolorbox}[
+    colback=blue!5!white, % Background color
+    colframe=white!75!black, % Border color
+    width=\textwidth, % Box width
+    boxrule=0.5mm, % Border thickness
+    sharp corners, % Sharp corners
+    title=PROMPT TEMPLATE FOR LLAMA3-8B WITH FSP,
+    fonttitle=\bfseries,
+    coltitle=black,
+    toptitle=3mm, % Space above title
+    bottomtitle=3mm % Space below title
+    ]
+
+\textbf{Prompt template:} \\
+%\textbf{Few Shot Prompt:}
+
+\begin{lstlisting}[language={}, basicstyle=\ttfamily\small, frame=single, backgroundcolor=\color{gray!10}, breaklines=true]
+You are a financial expert assistant. Answer the following question 
+based on the given context. It is CRUCIAL that you use 
+step-by-step reasoning and provide detailed numerical calculations where applicable. 
+Break down your answer into clear, numbered steps. 
+If asked to extract subject and object in relation, return only the single 
+most relevant and applicable extraction. Use '\n' for line breaks in your response.
+
+Examples:
+{examples}
+
+Now, please answer the following question using the same step-by-step 
+approach as demonstrated in the Examples:
+
+Context: {context}
+Question: {question}
+Answer (including calculation steps and final answer, or single 
+most relevant relation extraction, use '\n' for line breaks):"""
+\end{lstlisting}
+
+\end{tcolorbox}
+
+
+
+
+\label{sec:Prompt template-code-gen}
+\begin{tcolorbox}[
+    colback=blue!5!white, % Background color
+    colframe=white!75!black, % Border color
+    width=\textwidth, % Box width
+    boxrule=0.5mm, % Border thickness
+    sharp corners, % Sharp corners
+    title=IMPROVED FEW SHOT PROMPT TEMPLATE FOR CODE GENERATION AND EXECUTION,
+    fonttitle=\bfseries,
+    coltitle=black,
+    toptitle=3mm, % Space above title
+    bottomtitle=3mm % Space below title
+    ]
+
+Below is an instruction that describes a task, paired with examples and an input that provides further context. Learn from the examples and write a response that appropriately completes the request.
+
+\textbf{### Instruction:}
+
+You are an AI assistant specialized in financial analysis. Your task is to generate Python code that answers questions based on given financial data and context. Learn from the examples provided and generate accurate, executable Python code that solves the given problem.
+
+\textbf{Important:} When writing Python code, use actual newline characters to separate lines, not '\\n' string literals. Each line of code should be on its own line in your response.
+
+\textbf{### Examples:}
+
+\{examples\}
+
+\textbf{### Input:}
+
+\textbf{Context:}
+
+\{context\}
+
+\textbf{Question:} \{question\}
+
+\textbf{### Response:}
+
+Here's the Python code to answer the question:
+
+\texttt{```python}
+\end{tcolorbox}
+
 \section{Examples}
 
-Below are some sample examples comparing the model’s predictions to the reference values. The best performing model, highlighted in the table earlier, is used to generate these predictions.
+% Below are some sample examples comparing the model’s predictions to the reference values. The best performing model, highlighted in the table earlier, is used to generate these predictions.
+\subsection{TAT-QA Dataset}
+\begin{tcolorbox}[colback=blue!5!white, % Light blue background
+                 colframe=gray, % Gray frame
+                 %title=Sample JSON Data, % Title of the box
+                 fonttitle=\bfseries, % Bold font for the title
+                 breakable, % Allows the box to break across pages
+                 sharp corners, % Sharp corners for the box
+                 boxsep=10pt, % Padding around text
+                 left=10pt, % Left padding
+                 right=10pt, % Right padding
+                 top=10pt, % Top padding
+                 bottom=10pt, % Bottom padding
+                 enlarge left by=-10mm, % Extend the box into left margin
+                 enlarge right by=-10mm] % Extend the box into right margin
+\textbf{Context}: Actuarial assumptions. The Group’s scheme liabilities are measured using the projected unit credit method with principal actuarial assumptions set out below:
+\begin{itemize}
+    \item Figures represent a weighted average assumption of the individual schemes.
+    \item The rate of increases in pensions in payment and deferred revaluation are dependent on the rate of inflation.
+\end{itemize}
+\textbf{Table}:
+\begin{tabular}{lccc}
+    & 2019 \% & 2018 \% & 2017 \% \\
+    \hline
+    Rate of inflation & 2.9 & 2.9 & 3.0 \\
+    Rate of increase in salaries & 2.7 & 2.7 & 2.6 \\
+    Discount rate & 2.3 & 2.5 & 2.6 \\
+\end{tabular}
+
+\textbf{Question}: What does the Weighted average actuarial assumptions consist of? \\
+\textbf{Answer}: Rate of inflation, Rate of increase in salaries, Discount rate
+\end{tcolorbox}
+
+\subsection{CONVFINQA Dataset}
+
 
 % Any appendices, including any required ethics information, should be included
 % after the references.
