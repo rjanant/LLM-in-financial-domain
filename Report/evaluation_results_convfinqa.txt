@@ -1,0 +1,85 @@
+----- Results for Zero Shot -----
+Example type distribution:
+zero_shot: 1388
+one_shot: 0
+two_shot: 0
+random_shot: 0
+mix_shot: 0
+Average Permissive Accuracy: 0.68
+Average Exact Accuracy: 0.56
+ROUGE Score: 0.78
+BLEU Score: 0.00
+METEOR Score: 0.28
+BERTScore Precision: 0.977
+BERTScore Recall: 0.975
+BERTScore F1: 0.976
+GLEU Score: 0.27
+
+----- Results for One Shot -----
+Example type distribution:
+zero_shot: 0
+one_shot: 1388
+two_shot: 0
+random_shot: 0
+mix_shot: 0
+Average Permissive Accuracy: 0.68
+Average Exact Accuracy: 0.56
+ROUGE Score: 0.78
+BLEU Score: 0.00
+METEOR Score: 0.28
+BERTScore Precision: 0.976
+BERTScore Recall: 0.975
+BERTScore F1: 0.976
+GLEU Score: 0.34
+
+----- Results for Two Shot -----
+Example type distribution:
+zero_shot: 0
+one_shot: 0
+two_shot: 1388
+random_shot: 0
+mix_shot: 0
+Average Permissive Accuracy: 0.67
+Average Exact Accuracy: 0.56
+ROUGE Score: 0.77
+BLEU Score: 0.00
+METEOR Score: 0.28
+BERTScore Precision: 0.976
+BERTScore Recall: 0.975
+BERTScore F1: 0.975
+GLEU Score: 0.31
+
+----- Results for Random Shot -----
+Example type distribution:
+zero_shot: 0
+one_shot: 0
+two_shot: 0
+random_shot: 1388
+mix_shot: 0
+Average Permissive Accuracy: 0.68
+Average Exact Accuracy: 0.56
+ROUGE Score: 0.78
+BLEU Score: 0.00
+METEOR Score: 0.28
+BERTScore Precision: 0.977
+BERTScore Recall: 0.975
+BERTScore F1: 0.976
+GLEU Score: 0.27
+
+----- Results for Mix Shot -----
+Example type distribution:
+zero_shot: 0
+one_shot: 0
+two_shot: 0
+random_shot: 0
+mix_shot: 1388
+Average Permissive Accuracy: 0.68
+Average Exact Accuracy: 0.56
+ROUGE Score: 0.78
+BLEU Score: 0.00
+METEOR Score: 0.28
+BERTScore Precision: 0.976
+BERTScore Recall: 0.975
+BERTScore F1: 0.975
+GLEU Score: 0.32
+

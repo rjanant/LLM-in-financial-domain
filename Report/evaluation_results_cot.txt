@@ -1,0 +1,11 @@
+----- Results for CoT-FineTuned -----
+Average Permissive Accuracy: 0.63
+Average Exact Accuracy: 0.14
+ROUGE Score: 0.35
+BLEU Score: 0.07
+METEOR Score: 0.31
+BERTScore Precision: 0.847
+BERTScore Recall: 0.918
+BERTScore F1: 0.879
+GLEU Score: 0.07
+
