@@ -34,8 +34,6 @@ logger = logging.getLogger(__name__)
 # print("CUDA Version:", torch.version.cuda)
 # print("PyTorch Version:", torch.__version__)
 
-os.environ["HF_TOKEN"] = "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"
-
 hf_token = os.getenv("HF_TOKEN")
 if not hf_token:
     raise ValueError("Hugging Face token not found. Please set the HF_TOKEN environment variable.")

@@ -738,7 +738,7 @@ inference_and_scoring(test_set)
 
 
 # %%
-pip install -U sentence-transformers
+# pip install -U sentence-transformers
 
 # %%
 #llama3 - few shot relevant example 1
