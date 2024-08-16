@@ -61,3 +61,9 @@ If you encounter any issues:
 Ensure all commands are typed correctly and executed in the newly created Conda environment.
 Verify that your hardware setup meets the requirements for the fine-tuning and code generation experiments.
 Check that the requirements.txt file includes all necessary packages with their correct versions.
+
+
+## Citation
+Please cite this software using the metadata from `CITATION.cff`. Here's an example citation in APA style:
+
+Raj, Anant (2024).  Large language model number handling in the Finance Domain (Version 1.0.0) [Software]. Available at https://github.com/rjanant/disseration.git.

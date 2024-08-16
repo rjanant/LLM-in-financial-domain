@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+title: Large language model number handling in the Finance Domain
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Anant
+    family-names: Raj
+repository-code: 'https://github.com/rjanant/disseration.git'
+license: MIT
