@@ -41,7 +41,7 @@ Start the Jupyter Notebook server:
 In the Jupyter interface, create a new notebook and manually copy the .py script code into separate cells in the notebook. Execute the cells sequentially by pressing Shift + Enter.
 
 4. Reproduce Datasets
-Use the scripts provided in the 'preprocess_data' notebook to generate and merge datasets as required. Make sure to follow the notebook instructions for the correct order of operations.
+Use the scripts provided in the 'preprocess_raw_dataset' notebook to generate and merge datasets as required. Make sure to follow the notebook instructions for the correct order of operations.
 
 5. Seed Values for Reproducibility
 The code includes predefined seed values to ensure reproducibility. Make sure not to alter these unless necessary for your experiments, as they ensure that results are consistent across different runs.
