@@ -62,7 +62,7 @@ Ensure all commands are typed correctly and executed in the newly created Conda 
 Verify that your hardware setup meets the requirements for the fine-tuning and code generation experiments.
 Check that the requirements.txt file includes all necessary packages with their correct versions.
 
-
+**Note:** Although multiple evaluation metrics are defined in this repository, our paper primarily utilizes Average Permissive Accuracy and Average Exact Accuracy. These two metrics were selected for their relevance to the specific tasks discussed, including Relation-Extraction. Consequently, other metrics available here were not adopted for use in the paper.
 ## Citation
 Please cite this software using the metadata from `CITATION.cff`. Here's an example citation in APA style:
 
